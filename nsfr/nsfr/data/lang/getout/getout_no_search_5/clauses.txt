@@ -1,0 +1,5 @@
+jump(X):-type(O1,agent),type(O2,enemy).
+left_go_get_key(X):-type(O1,agent),type(O2,key).
+left_go_to_door(X):-type(O1,agent),type(O2,door).
+right_go_get_key(X):-type(O1,agent),type(O2,key).
+right_go_to_door(X):-type(O1,agent),type(O2,door).

@@ -1,0 +1,3 @@
+type:2:object,type
+closeby:2:object,object
+safe:2:object,object

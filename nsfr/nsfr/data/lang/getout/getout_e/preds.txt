@@ -1,0 +1,2 @@
+jump:1:image
+stay:1:image

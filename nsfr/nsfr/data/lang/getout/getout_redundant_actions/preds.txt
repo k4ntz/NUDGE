@@ -1,0 +1,10 @@
+jump:1:image
+left_go_get_key:1:image
+right_go_get_key:1:image
+left_go_to_door:1:image
+right_go_to_door:1:image
+stay:1:image
+jump_over_door:1:image
+left_for_nothing:1:image
+right_go_to_enemy:1:image
+stay_for_nothing:1:image

@@ -1,0 +1,6 @@
+up_to_eat:1:image
+left_to_eat:1:image
+down_to_eat:1:image
+right_to_eat:1:image
+up_to_dodge:1:image
+down_to_dodge:1:image

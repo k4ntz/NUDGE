@@ -1,0 +1,7 @@
+matplotlib
+numpy
+seaborn
+setuptools
+torch
+tqdm
+lark

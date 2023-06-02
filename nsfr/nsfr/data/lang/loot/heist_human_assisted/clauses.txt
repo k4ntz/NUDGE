@@ -1,0 +1,10 @@
+up_to_key(X):-type(O1,agent),type(O2,key),on_top(O2,O1),close(O1,O2).
+left_to_key(X):-type(O1,agent),type(O2,key),on_left(O2,O1),close(O1,O2).
+right_to_key(X):-type(O1,agent),type(O2,key),on_right(O2,O1),close(O1,O2).
+down_to_key(X):-type(O1,agent),type(O2,key),at_bottom(O2,O1),close(O1,O2).
+up_to_door(X):-type(O1,agent),type(O2,door),have_key(O2),on_top(O2,O1).
+left_to_door(X):-type(O1,agent),type(O2,door),have_key(O2),on_left(O2,O1).
+right_to_door(X):-type(O1,agent),type(O2,door),have_key(O2),on_right(O2,O1).
+down_to_door(X):-type(O1,agent),type(O2,door),have_key(O2),at_bottom(O2,O1).
+right_bypass_door(X):-type(O1,agent),type(O2,door),not_have_key(O2),closeby_vertical(O1,O2),close(O1,O2).
+up_bypass_door(X):-type(O1,agent),type(O2,door),not_have_key(O2),closeby_horizontal(O1,O2),close(O1,O2).

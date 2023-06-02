@@ -1,0 +1,5 @@
+up(X):-.
+noop_because_left(X):-on_left(O2,O1),type(O1,chicken),type(O2,car),above_row(02,01),closeby(O2,01),bottom5car(02).
+noop_because_right(X):-on_right(O2,O1),type(O1,chicken),type(O2,car),above_row(02,01),closeby(O2,01),top5car(02).
+down_because_left(X):-on_left(O2,O1),type(O1,chicken),type(O2,car),above_row(02,01),closeby(O2,01),on_left(O3,O1),type(O3,car),same_row(03,01),closeby(O3,01),bottom5car(02),bottom5car(03).
+down_because_right(X):-on_right(O2,O1),type(O1,chicken),type(O2,car),above_row(02,01),closeby(O2,01),on_right(O3,O1),type(O3,car),same_row(03,01),closeby(O3,01),top5car(02),top5car(03).

@@ -1,0 +1,7 @@
+type:2:object,type
+closeby:2:object,object
+on_left:2:object,object
+on_right:2:object,object
+have_key:1:image
+not_have_key:1:image
+safe:2:object,object

@@ -1,0 +1,11 @@
+up_to_eat(X):-type(O1,agent),type(O2,fish),is_smaller_than(O2,O1),on_top(O2,O1).
+left_to_eat(X):-type(O1,agent),type(O2,fish),is_smaller_than(O2,O1),on_left(O2,O1).
+down_to_eat(X):-type(O1,agent),type(O2,fish),is_smaller_than(O2,O1),at_bottom(O2,O1).
+right_to_eat(X):-type(O1,agent),type(O2,fish),is_smaller_than(O2,O1),on_right(O2,O1).
+up_to_dodge(X):-type(O1,agent),type(O2,fish),is_bigger_than(O2,O1),low_level(O2,O1),closeby(O1,O2).
+down_to_dodge(X):-type(O1,agent),type(O2,fish),is_bigger_than(O2,O1),high_level(O2,O1),closeby(O1,O2).
+up_redundant(X):-type(O1,agent),type(O2,fish),is_bigger_than(O2,O1),on_top(O2,O1).
+down_redundant(X):-type(O1,agent),type(O2,fish),is_bigger_than(O2,O1),at_bottom(O2,O1).
+left_redundant(X):-type(O1,agent),type(O2,fish),on_right(O2,O1),closeby(O1,O2).
+right_redundant(X):-type(O1,agent),type(O2,fish),on_left(O2,O1),closeby(O1,O2).
+idle_redundant(X):-type(O1,agent),type(O2,fish),closeby(O1,O2).

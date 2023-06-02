@@ -1,0 +1,12 @@
+up_to_key(X):-close(O1,O2),on_top(O2,O1),type(O1,agent),type(O2,key).
+left_to_key(X):-close(O1,O2),on_left(O2,O1),type(O1,agent),type(O2,key).
+right_to_key(X):-close(O1,O2),on_right(O2,O1),type(O1,agent),type(O2,key).
+down_to_key(X):-close(O1,O2),on_top(O1,O2),type(O1,agent),type(O2,key).
+up_to_door(X):-close(O1,O2),have_key(O2),on_top(O2,O1),type(O1,agent),type(O2,door).
+left_to_door(X):-close(O1,O2),have_key(O2),on_left(O2,O1),type(O1,agent),type(O2,door).
+right_to_door(X):-close(O1,O2),have_key(O2),on_left(O1,O2),type(O1,agent),type(O2,door).
+down_to_door(X):-close(O1,O2),have_key(O2),on_top(O1,O2),type(O1,agent),type(O2,door).
+left_redundant(X):-have_key(O2),on_right(O2,O1),type(O1,agent),type(O2,door).
+right_redundant(X):-close(O1,O2),type(O1,agent),type(O2,key).
+up_redundant(X):-on_top(O1,O2),type(O1,agent),type(O2,key).
+down_redundant(X):-close(O1,O2),have_key(O2),type(O1,agent),type(O2,door).
