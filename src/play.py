@@ -43,7 +43,7 @@ def main():
                         required=True, action="store", dest="env",
                         choices=['getout', 'getoutplus', 'getout4en',
                                  'threefish', 'threefishcolor',
-                                 'loot', 'lootcolor', 'lootplus',
+                                 'loot', 'lootcolor', 'lootplus', 'loothard',
                                  'ecoinrun', 'freeway', 'kangaroo', 'asterix'])
     parser.add_argument("-r", "--rules", dest="rules", default=None,
                         required=False,

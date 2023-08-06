@@ -335,6 +335,7 @@ def render_loot(agent, args):
             while True:
                 step += 1
                 if args.alg == 'logic':
+                    import ipdb;ipdb.set_trace()
                     action, explaining = agent.act(obs)
                 else:
                     action = agent.act(obs)
@@ -399,7 +400,6 @@ def render_atari(agent, args):
     env = OCAtari(env_name=args.env.capitalize(), render_mode=rdr_mode, mode="revised")
     obs = env.reset()
     # from pprint import pprint
-    # pprint(env.objects)
     try:
         agent.nb_actions = env.nb_actions
     except:

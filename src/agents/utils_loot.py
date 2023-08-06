@@ -10,6 +10,7 @@ def extract_logic_state_loot(state, args):
     [agent,key_b,door_b,key_g,door_g,key_r,door_r]
     """
     states = torch.from_numpy(state['positions']).squeeze()
+    print(states)
     if args.env == 'lootplus':
         # input shape: [X,Y]* [agent,key_b,door_b,key_g,door_g,key_r,door_r]
         # output shape:[agent, key, door, blue, green, red ,got_key, X, Y]
@@ -66,6 +67,7 @@ def extract_logic_state_loot(state, args):
             elif i in [2, 4] and state[-1] != 0 and extracted_state[i - 1][1] == 0:
                 extracted_state[i][-3] = 1
     extracted_state = extracted_state.unsqueeze(0)
+    print(extracted_state)
     return extracted_state.to(device)
 
 
