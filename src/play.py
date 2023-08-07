@@ -12,13 +12,15 @@ device = torch.device('cuda:0')
 
 
 def load_model(model_path, args, set_eval=True):
+    print("Loading")
     with open(model_path, "rb") as f:
         if args.alg == 'ppo':
             model = ActorCritic(args).to(device)
         elif args.alg == 'logic':
             model = NSFR_ActorCritic(args).to(device)
         # import ipdb; ipdb.set_trace()
-        # model.load_state_dict(state_dict=torch.load(f))
+        model.load_state_dict(state_dict=torch.load(f))
+        model.actor.print_program()
 
     model = model.actor
     model.as_dict = True
@@ -54,7 +56,8 @@ def main():
                                  'loot_human_assisted', 'loot_bs_top5', 'loot_bs_rf3', 'loot_bs_rf1',
                                  'loot_redundant_actions', 'freeway_bs_rf1', 'asterix_bs_rf1'
                                  ])
-    parser.add_argument("-l", "--log", help="record the information of games", type=bool, default=False, dest="log")
+    parser.add_argument("-l", "--log", help="record the information of games", action="store_true")
+    parser.add_argument("-rec", "--record", help="record the rendering of the game", action="store_true")
     parser.add_argument("--log_file_name", help="the name of log file", required=False, dest='logfile')
     parser.add_argument("--render", help="render the game", action="store_true", dest="render")
     # arg = ['-alg', 'human', '-m', 'getout', '-env', 'getout','-l','True']
@@ -130,7 +133,9 @@ def main():
         render_ecoinrun(agent, args)
     elif args.m == 'atari':
         render_atari(agent, args)
-
+    else:
+        print("Wrong game provided")
+        exit(1)
 
 if __name__ == "__main__":
     main()

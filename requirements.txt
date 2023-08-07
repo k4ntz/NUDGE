@@ -3,7 +3,7 @@ gym
 gym3
 #torch==1.12.1
 lark-parser
-sklearn
+scikit-learn
 gym
 gym3
 filelock

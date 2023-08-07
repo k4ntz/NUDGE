@@ -35,7 +35,6 @@ class NSFReasoner(nn.Module):
         return prednames
 
     def forward(self, x):
-        import ipdb; ipdb.set_trace()
         zs = x
         # convert to the valuation tensor
         V_0 = self.fc(zs, self.atoms, self.bk)

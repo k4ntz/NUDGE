@@ -8,12 +8,22 @@ import pandas as pd
 from tqdm import tqdm
 import sys
 import io
+import os
+import cv2
 from environments.procgen.procgen import ProcgenGym3Env
 from environments.getout.getout.imageviewer import ImageViewer
 from environments.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
 from environments.getout.getout.getout.getout import Getout
 from environments.getout.getout.getout.actions import GetoutActions
 from ocatari.core import OCAtari
+from PIL import Image, ImageFont, ImageDraw
+
+
+font_path = os.path.join(cv2.__path__[0], 'qt', 'fonts', 'DejaVuSans.ttf')
+font = ImageFont.truetype(font_path, size=40)
+disp_text = None
+repeated = 10
+
 
 def hexify(la):
     return hex(int("".join([str(l) for l in la])))
@@ -91,17 +101,17 @@ def render_getout(agent, args):
         else:
             enemies = False
         # level_generator = DummyGenerator()
-        coin_jump = Getout()
+        getout = Getout()
         level_generator = ParameterizedLevelGenerator(enemies=enemies)
-        level_generator.generate(coin_jump, seed=seed)
-        coin_jump.render()
+        level_generator.generate(getout, seed=seed)
+        getout.render()
 
-        return coin_jump
+        return getout
 
     # seed = random.randint(0, 100000000)
     # print(seed)
-    coin_jump = create_getout_instance(args)
-    viewer = setup_image_viewer(coin_jump)
+    getout = create_getout_instance(args)
+    viewer = setup_image_viewer(getout)
 
     # frame rate limiting
     fps = 10
@@ -140,12 +150,11 @@ def render_getout(agent, args):
         # step game
         step += 1
         action = []
-        if not coin_jump.level.terminated:
+        if not getout.level.terminated:
             if args.alg == 'logic':
-                # import ipdb; ipdb.set_trace()
-                action, explaining = agent.act(coin_jump)
+                action, explaining = agent.act(getout)
             elif args.alg == 'ppo':
-                action = agent.act(coin_jump)
+                action = agent.act(getout)
             elif args.alg == 'human':
                 if KEY_a in viewer.pressed_keys or KEY_LEFT in viewer.pressed_keys:
                     action.append(GetoutActions.MOVE_LEFT)
@@ -156,9 +165,9 @@ def render_getout(agent, args):
                 if KEY_s in viewer.pressed_keys:
                     action.append(GetoutActions.MOVE_DOWN)
             elif args.alg == 'random':
-                action = agent.act(coin_jump)
+                action = agent.act(getout)
         else:
-            coin_jump = create_getout_instance(args)
+            getout = create_getout_instance(args)
             # print("epi_reward: ", round(epi_reward, 2))
             # print("--------------------------     next game    --------------------------")
             print(f"Episode {num_epi}")
@@ -173,22 +182,22 @@ def render_getout(agent, args):
             num_epi += 1
             step = 0
 
-        reward = coin_jump.step(action)
-        score = coin_jump.get_score()
+        reward = getout.step(action)
+        score = getout.get_score()
         current_reward += reward
         average_reward = round(current_reward / num_epi, 2)
         if args.alg == 'logic':
-            if last_explaining is None:
+            if last_explaining is None or (explaining != last_explaining and repeated > 4):
                 print(explaining)
                 last_explaining = explaining
-            elif explaining != last_explaining:
-                print(explaining)
-                last_explaining = explaining
+                disp_text = explaining
+                repeated = 0
+            repeated += 1
 
         if args.log:
             if args.alg == 'logic':
                 probs = agent.get_probs()
-                logic_state = agent.get_state(coin_jump)
+                logic_state = agent.get_state(getout)
                 data = [(num_epi, step, reward, average_reward, logic_state, probs)]
                 writer.writerows(data)
             elif args.alg == 'ppo' or args.alg == 'random':
@@ -198,16 +207,22 @@ def render_getout(agent, args):
         epi_reward += reward
 
         if args.render:
-            np_img = np.asarray(coin_jump.camera.screen)
+            screen = getout.camera.screen
+            ImageDraw.Draw(screen).text((40, 60), disp_text, (120, 20, 20), font=font)
+            np_img = np.asarray(screen)
             viewer.show(np_img[:, :, :3])
+            if args.record:
+                screen.save(f"renderings/{step:03}.png")
 
-        # terminated = coin_jump.level.terminated
+        # terminated = getout.level.terminated
         # if terminated:
         #    break
         if viewer.is_escape_pressed:
             break
 
-        if coin_jump.level.terminated:
+        if getout.level.terminated:
+            if args.record:
+                exit()
             step = 0
             print(num_epi)
             print('reward: ' + str(round(score, 2)))
@@ -238,7 +253,6 @@ def render_threefish(agent, args):
             writer.writerow(head)
 
     if agent == "human":
-
         ia = gym3.Interactive(env, info_key="rgb", height=768, width=768)
         all_summaries = run(ia, 10)
 
@@ -269,32 +283,28 @@ def render_threefish(agent, args):
                 env.act(action)
                 rew, obs, done = env.observe()
                 total_r += rew[0]
-                # if args.alg == 'logic':
-                #     if last_explaining is None:
-                #         print(explaining)
-                #         last_explaining = explaining
-                #     elif explaining != last_explaining:
-                #         print(explaining)
-                #         last_explaining = explaining
-
-                # if args.log:
-                #     if args.alg == 'logic':
-                #         probs = agent.get_probs()
-                #         logic_state = agent.get_state(obs)
-                #         data = [(epi, step, rew[0], average_r, logic_state, probs)]
-                #         writer.writerows(data)
-                #     else:
-                #         data = [(epi, step, rew[0], average_r)]
-                #         writer.writerows(data)
-
+                if args.alg == 'logic':
+                    if last_explaining is None or (explaining != last_explaining and repeated > 4):
+                        print(explaining)
+                        last_explaining = explaining
+                        disp_text = explaining
+                        repeated = 0
+                    repeated += 1
                 if done:
                     step = 0
                     print("episode: ", epi)
                     print("return: ", total_r)
                     scores.append(total_r)
+                    if args.record:
+                        exit()
                     break
                 if epi > 100:
                     break
+                if args.record:
+                    screen = Image.fromarray(env._get_image())
+                    ImageDraw.Draw(screen).text((40, 60), disp_text, (120, 20, 20), font=font)
+                    screen.save(f"renderings/{step:03}.png")
+
 
             df = pd.DataFrame({'reward': scores})
             df.to_csv(f"logs/{envname}/{args.alg}_{envname}_log_{args.seed}.csv", index=False)
@@ -327,6 +337,7 @@ def render_loot(agent, args):
         reward, obs, done = env.observe()
         scores = []
         last_explaining = None
+        nsteps = 0
         for epi in range(20):
             print(f"Episode {epi}")
             print(f"==========")
@@ -334,6 +345,7 @@ def render_loot(agent, args):
             step = 0
             while True:
                 step += 1
+                nsteps += 1
                 if args.alg == 'logic':
                     action, explaining = agent.act(obs)
                 else:
@@ -341,14 +353,19 @@ def render_loot(agent, args):
                 env.act(action)
                 rew, obs, done = env.observe()
                 total_r += rew[0]
-                # if args.alg == 'logic':
-                #     if last_explaining is None:
-                #         print(explaining)
-                #         last_explaining = explaining
-                #     elif explaining != last_explaining:
-                #         print(explaining)
-                #         last_explaining = explaining
+                if args.alg == 'logic':
+                    if last_explaining is None or (explaining != last_explaining and repeated > 2):
+                        print(explaining)
+                        last_explaining = explaining
+                        disp_text = explaining
+                        repeated = 0
+                    repeated += 1
 
+                if args.record:
+                    screen = Image.fromarray(env._get_image())
+                    ImageDraw.Draw(screen).text((40, 60), disp_text, (20, 170, 20), font=font)
+                    screen.save(f"renderings/{nsteps:03}.png")
+                
                 # if args.log:
                 #     if args.alg == 'logic':
                 #         probs = agent.get_probs()
@@ -360,13 +377,15 @@ def render_loot(agent, args):
                 #         writer.writerows(data)
 
                 if done:
-                    step = 0
+                    # step = 0
                     print("episode: ", epi)
                     print("return: ", total_r)
                     scores.append(total_r)
                     break
+
                 if epi > 100:
                     break
+                
 
             df = pd.DataFrame({'reward': scores})
             df.to_csv(f"logs/{envname}/{args.alg}_{envname}_log_{args.seed}.csv", index=False)
