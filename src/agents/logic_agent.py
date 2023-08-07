@@ -51,7 +51,6 @@ class NSFR_ActorCritic(nn.Module):
         raise NotImplementedError
 
     def act(self, logic_state, epsilon=0.0):
-
         action_probs = self.actor(logic_state)
 
         # e-greedy

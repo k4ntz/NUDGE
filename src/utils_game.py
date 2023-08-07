@@ -356,7 +356,7 @@ def render_loot(agent, args):
                 total_r += rew[0]
                 if args.alg == 'logic':
                     if last_explaining is None or (explaining != last_explaining and repeated > 2):
-                        print(explaining)
+                        # print(explaining)
                         last_explaining = explaining
                         disp_text = explaining
                         repeated = 0

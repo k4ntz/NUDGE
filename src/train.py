@@ -240,7 +240,7 @@ def main():
         current_ep_reward = 0
 
         epsilon = epsilon_func(i_episode)
-        
+
         for t in range(1, max_ep_len + 1):
 
             # select action with policy
