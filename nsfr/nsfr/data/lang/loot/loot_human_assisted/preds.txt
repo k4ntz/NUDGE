@@ -1,0 +1,10 @@
+up_to_key:1:image
+left_to_key:1:image
+right_to_key:1:image
+down_to_key:1:image
+up_to_door:1:image
+left_to_door:1:image
+right_to_door:1:image
+down_to_door:1:image
+right_bypass_door:1:image
+up_bypass_door:1:image

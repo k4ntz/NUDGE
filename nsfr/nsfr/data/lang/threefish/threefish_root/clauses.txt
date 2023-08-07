@@ -1,0 +1,6 @@
+up_to_eat(X):-type(O1,agent),type(O2,fish).
+left_to_eat(X):-type(O1,agent),type(O2,fish).
+down_to_eat(X):-type(O1,agent),type(O2,fish).
+right_to_eat(X):-type(O1,agent),type(O2,fish).
+up_to_dodge(X):-type(O1,agent),type(O2,fish).
+down_to_dodge(X):-type(O1,agent),type(O2,fish).

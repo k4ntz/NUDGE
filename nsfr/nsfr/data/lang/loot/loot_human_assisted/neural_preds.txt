@@ -1,0 +1,11 @@
+type:2:object,type
+color:2:object,color
+on_left:2:object,object
+on_right:2:object,object
+on_top:2:object,object
+at_bottom:2:object,object
+have_key:1:object
+not_have_key:1:object
+close:2:object,object
+closeby_vertical:2:object,object
+closeby_horizontal:2:object,object

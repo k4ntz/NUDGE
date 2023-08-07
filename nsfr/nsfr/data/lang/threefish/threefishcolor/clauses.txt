@@ -1,0 +1,6 @@
+up_to_eat(X):-type(O1,agent),type(O2,fish),color(O2,green),on_top(O2,O1).
+left_to_eat(X):-type(O1,agent),type(O2,fish),color(O2,green),on_left(O2,O1).
+down_to_eat(X):-type(O1,agent),type(O2,fish),color(O2,green),at_bottom(O2,O1).
+right_to_eat(X):-type(O1,agent),type(O2,fish),color(O2,green),on_right(O2,O1).
+up_to_dodge(X):-type(O1,agent),type(O2,fish),color(O2,red),low_level(O2,O1),closeby(O1,O2).
+down_to_dodge(X):-type(O1,agent),type(O2,fish),color(O2,red),high_level(O2,O1),closeby(O1,O2).

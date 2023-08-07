@@ -1,0 +1,9 @@
+type:2:object,type
+color:2:object,color
+on_top:2:object,object
+on_left:2:object,object
+at_bottom:2:object,object
+on_right:2:object,object
+closeby:2:object,object
+high_level:2:object,object
+low_level:2:object,object

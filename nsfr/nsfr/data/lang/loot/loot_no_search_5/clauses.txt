@@ -1,0 +1,5 @@
+down_to_door(X):-have_key(O2),type(O1,agent),type(O2,door).
+left_to_key(X):-type(O1,agent),type(O2,key).
+right_to_door(X):-have_key(O2),type(O1,agent),type(O2,door).
+right_to_key(X):-type(O1,agent),type(O2,key).
+up_to_door(X):-have_key(O2),type(O1,agent),type(O2,door).

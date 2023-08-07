@@ -1,0 +1,3 @@
+object:obj1,obj2,obj3
+type:agent,fish
+image:img

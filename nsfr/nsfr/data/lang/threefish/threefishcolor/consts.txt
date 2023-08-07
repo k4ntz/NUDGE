@@ -1,0 +1,4 @@
+object:obj1,obj2,obj3
+type:agent,fish
+color:green,red
+image:img
