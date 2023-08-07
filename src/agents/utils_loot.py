@@ -24,10 +24,28 @@ def extract_logic_state_loot(state, args):
             [0, 0, 1, 0, 0, 1, 0, 0, 0]], dtype=torch.float64)
         extracted_state[:, -2:] = states[:]
         for i, state in enumerate(extracted_state):
-            if state[-1] == 0:
+            if state[-1] == 0 and state[-2] == 0:
                 extracted_state[i] = torch.zeros((1, 9))
             elif i in [2, 4, 6] and state[-1] != 0 and extracted_state[i - 1][1] == 0:
                 extracted_state[i][-3] = 1
+    elif args.env == 'loothard':
+        # input shape: [X,Y]* [agent, key_b, door_b, key_g, door_g, exit]
+        # output shape:[agent, key, door, blue, green, exit,got_key, X, Y]
+        extracted_state = torch.tensor([
+            [1, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0]], dtype=torch.float64)
+        states = states[0:6]
+        extracted_state[:, -2:] = states[:]
+        for i, state in enumerate(extracted_state):
+            if state[-1] == 0 and state[-2] == 0:
+                extracted_state[i] = torch.zeros((1, 9))
+            elif i in [2, 4] and state[-1] != 0 and extracted_state[i - 1][1] == 0: # setting got_key
+                extracted_state[i][-3] = 1
+
     elif args.env == "loot":
         # input shape: [X,Y]* [agent,key_b,door_b,key_g,door_g]
         # output shape:[agent, key, door, blue, red ,got_key, X, Y]
@@ -41,7 +59,7 @@ def extract_logic_state_loot(state, args):
         extracted_state[:, -2:] = states[:]
         for i, state in enumerate(extracted_state):
             # 0 mean object does not exist
-            if state[-1] == 0:
+            if state[-1] == 0 and state[-2] == 0:
                 # then set to all attributes 0
                 extracted_state[i] = torch.zeros((1, 8))
             # if key = 0 but door !=0, means key of this door has picked
@@ -60,7 +78,7 @@ def extract_logic_state_loot(state, args):
         extracted_state[:, -2:] = states[:]
         for i, state in enumerate(extracted_state):
             # 0 mean object does not exist
-            if state[-1] == 0:
+            if state[-1] == 0 and state[-2] == 0:
                 # then set to all attributes 0
                 extracted_state[i] = torch.zeros((1, 8))
             # if key = 0 but door !=0, means key of this door has picked
@@ -83,9 +101,18 @@ def extract_neural_state_loot(state, args):
                               [0, 0, 1, 3],
                               [0, 0, 2, 3]], dtype=np.float32)
         raw_state[:, 0:2] = state[0][:]
+        
+    elif args.env == 'loothard':
+        raw_state = np.array([[0, 0, 0, 0],
+                              [0, 0, 1, 1],
+                              [0, 0, 2, 1],
+                              [0, 0, 1, 2],
+                              [0, 0, 2, 2],
+                              [0, 0, 3, 0],
+                              [0, 0, 0, 0]], dtype=np.float32)
+        raw_state[:, 0:2] = state[0][:]
 
     elif args.env == 'loot':
-
         raw_state = np.array([[0, 0, 0, 0],
                               [0, 0, 1, 1],
                               [0, 0, 2, 1],

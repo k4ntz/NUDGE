@@ -5,6 +5,7 @@ from .logic_utils import build_infer_module, build_clause_infer_module, build_cl
 from .valuation_cj import CJValuationModule
 from .valuation_bf import BFValuationModule
 from .valuation_h import HValuationModule
+from .valuation_hh import HHValuationModule
 from nsfr.logic_utils import get_lang
 
 
@@ -36,7 +37,10 @@ def get_nsfr_cgen_model(args, lang, clauses, atoms, bk, device, train=False):
     elif args.m == 'threefish':
         VM = BFValuationModule(lang=lang, device=device)
     elif args.m == 'loot':
-        VM = HValuationModule(lang=lang, device=device)
+        if args.env == "loothard":
+            VM = HHValuationModule(lang=lang, device=device)
+        else:
+            VM = HValuationModule(lang=lang, device=device)
     FC = FactsConverter(lang=lang,
                         valuation_module=VM, device=device)
     IM = build_infer_module(clauses, atoms, lang,

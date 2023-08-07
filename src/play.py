@@ -53,7 +53,7 @@ def main():
                                  'getout_bs_rf3', 'getoutplus', 'getout_redundant_actions',
                                  'threefish_human_assisted', 'threefishcolor', 'threefish_bs_top5', 'threefish_bs_rf3',
                                  'threefish_bs_rf1', 'threefish_redundant_actions',
-                                 'loot_human_assisted', 'loot_bs_top5', 'loot_bs_rf3', 'loot_bs_rf1',
+                                 'loot_human_assisted', 'loot_bs_top5', 'loot_bs_rf3', 'loot_bs_rf1', 'loothard',
                                  'loot_redundant_actions', 'freeway_bs_rf1', 'asterix_bs_rf1'
                                  ])
     parser.add_argument("-l", "--log", help="record the information of games", action="store_true")

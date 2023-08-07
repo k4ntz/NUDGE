@@ -325,7 +325,7 @@ def render_loot(agent, args):
             writer.writerow(head)
 
     if agent == "human":
-        ia = gym3.Interactive(env, info_key="rgb", height=768, width=768)
+        ia = gym3.Interactive(env, info_key="rgb", height=768*2, width=768*2)
         all_summaries = run(ia, 20)
 
         scores = get_values(all_summaries, "episode_return")
@@ -347,7 +347,7 @@ def render_loot(agent, args):
                 step += 1
                 nsteps += 1
                 if args.alg == 'logic':
-                    import ipdb;ipdb.set_trace()
+                    # print(obs['positions'])
                     action, explaining = agent.act(obs)
                 else:
                     action = agent.act(obs)

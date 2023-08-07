@@ -104,6 +104,7 @@ class LootHard : public BasicAbstractGame {
                 obj->x = 0.;
                 obj->y = 0.;
                 obj->will_erase = true;
+                step_data.reward += COMPLETION_BONUS/4.0;
             }
             // if (std::count(num_locks_unlocked.begin(), num_locks_unlocked.end(), true) == num_keys) {
             //     step_data.done = true;
