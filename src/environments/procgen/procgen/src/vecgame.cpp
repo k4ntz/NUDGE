@@ -621,6 +621,52 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           info_types.push_back(s);
       }
     }
+    else if (env_name == "loothard"){
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "positions");
+          s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+          s.dtype = LIBENV_DTYPE_FLOAT32;
+          s.shape[0] = 7;
+          s.shape[1] = 2;
+          s.ndim = 2;
+          s.low.float32 = 0.25f;
+          s.high.float32 = 2.0f;
+          observation_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "agent_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1;
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "exit_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1;
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "key_count");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.ndim = 0,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+    }
     else if (env_name == "threefish"){
     {
         struct libenv_tensortype s; // table of all fish

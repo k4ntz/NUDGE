@@ -60,6 +60,7 @@ add_library(env
   src/games/loot.cpp
   src/games/lootcolor.cpp
   src/games/lootplus.cpp
+  src/games/loothard.cpp
   src/mazegen.cpp
   src/randgen.cpp
   src/roomgen.cpp
