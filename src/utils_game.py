@@ -387,7 +387,7 @@ def render_loot(agent, args):
                 if epi > 100:
                     break
                 
-
+            # import ipdb; ipdb.set_trace()
             df = pd.DataFrame({'reward': scores})
             df.to_csv(f"logs/{envname}/{args.alg}_{envname}_log_{args.seed}.csv", index=False)
 
