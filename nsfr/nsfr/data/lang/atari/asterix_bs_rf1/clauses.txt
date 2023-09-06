@@ -9,5 +9,3 @@ down_bonus_left(X):-on_left(O2,O1),type(O1,player),type(O2,bonus),below_row(02,0
 down_bonus_right(X):-on_right(O2,O1),type(O1,player),type(O2,bonus),below_row(02,01),closeby(O2,01).
 right_bonus(X):-on_right(O2,O1),type(O1,player),type(O2,bonus),same_row(02,01).
 left_bonus(X):-on_left(O2,O1),type(O1,player),type(O2,bonus),same_row(02,01).
-left(X):-type(O1,player),at_right(O1).
-right(X):-type(O1,player),at_left(O1).

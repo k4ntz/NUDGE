@@ -15,13 +15,11 @@ def extract_logic_state_atari(state, args, noise=False):
         extracted_states = np.zeros((num_of_object, num_of_feature))
         for i, entity in enumerate(representation):
             if entity.category == "Chicken" and i == 0:
-                # import ipdb; ipdb.set_trace()
                 extracted_states[0][0] = 1
                 extracted_states[0][-2:] = entity.xy
             elif entity.category == 'Car':
                 extracted_states[i-1][1] = 1
                 extracted_states[i-1][-2:] = entity.xy
-                # extracted_states[1][-2:] /= 27
     elif 'asterix' in args.env.lower():
         num_of_feature = 6
         num_of_object = 11
@@ -41,7 +39,7 @@ def extract_logic_state_atari(state, args, noise=False):
                 extracted_states[i][3] = 1
                 extracted_states[i][-2:] = entity.xy
     else:
-        print("Not implemented yet, utils_atari.py:28")
+        raise NotImplementedError
 
     def simulate_prob(extracted_states, num_of_objs, key_picked):
         for i, obj in enumerate(extracted_states):

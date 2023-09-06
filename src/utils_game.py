@@ -186,6 +186,7 @@ def render_getout(agent, args):
         score = getout.get_score()
         current_reward += reward
         average_reward = round(current_reward / num_epi, 2)
+        disp_text = ""
         if args.alg == 'logic':
             if last_explaining is None or (explaining != last_explaining and repeated > 4):
                 print(explaining)

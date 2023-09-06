@@ -127,6 +127,7 @@ class SameRowValuationFunction(nn.Module):
         result = torch.where(diff < 6, 0.99, 0.01)
         return result
     
+
 class AboveRowValuationFunction(nn.Module):
     """The function v_closeby.
     """
@@ -190,6 +191,7 @@ class Bottom5CarsValuationFunction(nn.Module):
         y = z_1[:, -1]
         result = torch.where(y < 100, 0.99, 0.01)
         return result
+    
     
 class HaveKeyValuationFunction(nn.Module):
     """The function v_closeby.

@@ -18,9 +18,9 @@ def load_model(model_path, args, set_eval=True):
             model = ActorCritic(args).to(device)
         elif args.alg == 'logic':
             model = NSFR_ActorCritic(args).to(device)
-        # import ipdb; ipdb.set_trace()
         model.load_state_dict(state_dict=torch.load(f))
-        model.actor.print_program()
+        if args.alg == 'logic':
+            model.actor.print_program()
 
     model = model.actor
     model.as_dict = True
@@ -81,7 +81,6 @@ def main():
             print(f"Please use one of the following agent: {os.listdir(models_folder)}")
             model_name = input('Enter file name: ')
         # model_file = os.path.join(models_folder, model_name)
-        # import ipdb; ipdb.set_trace()
         model_file = os.path.join(current_path, 'models', args.m, args.alg, model_name)
         model = load_model(model_file, args)
     else:
