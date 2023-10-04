@@ -1,6 +1,6 @@
-# LogicRL
+# NUDGE
 
-This is the code for RL agents using logic.
+This is the code for NUDGE the logic RL agents.
 ![](image/LogicRL.png)
 
 ## Installation
