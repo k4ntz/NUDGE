@@ -1,43 +1,30 @@
 import torch
 import numpy as np
 import os
-import seaborn as sns
-import matplotlib.pyplot as plt
+import importlib.util
+import sys
 
 from .facts_converter import FactsConverter
 from .nsfr import NSFReasoner
 from .logic_utils import build_infer_module, get_lang
-from .valuation_cj import CJValuationModule
-from .valuation_bf import BFValuationModule
-from .valuation_h import HValuationModule
-from .valuation_hh import HHValuationModule
-from .valuation_a import AValuationModule
-from .valuation_aa import AAValuationModule
+from valuation import ValuationModule
 
 device = torch.device('cuda:0')
 
 
 def get_nsfr_model(args, train=False):
+    env_name = args.m
+
     current_path = os.path.dirname(__file__)
     lark_path = os.path.join(current_path, 'lark/exp.lark')
     lang_base_path = os.path.join(current_path, 'data/lang/')
-    # device = torch.device('cuda:0')
-    lang, clauses, bk, atoms = get_lang(
-        lark_path, lang_base_path, args.m, args.rules)
-    if args.m == 'getout':
-        VM = CJValuationModule(lang=lang, device=device)
-    elif args.m == 'threefish':
-        VM = BFValuationModule(lang=lang, device=device)
-    elif args.m == 'loot':
-        if args.env == "loothard":
-            VM = HHValuationModule(lang=lang, device=device)
-        else:
-            VM = HValuationModule(lang=lang, device=device)
-    elif args.m == 'atari' and "freeway" in args.env.lower():
-        VM = AValuationModule(lang=lang, device=device)
-    elif args.m == 'atari' and "asterix" in args.env.lower():
-        VM = AAValuationModule(lang=lang, device=device)
-    FC = FactsConverter(lang=lang, valuation_module=VM, device=device)
+
+    lang, clauses, bk, atoms = get_lang(lark_path, lang_base_path, env_name, args.rules)
+
+    val_fn_path = f"example/valuation/{env_name}.py"
+    val_module = ValuationModule(val_fn_path, lang, device)
+
+    FC = FactsConverter(lang=lang, valuation_module=val_module, device=device)
     prednames = []
     for clause in clauses:
         if clause.head.pred.name not in prednames:
@@ -47,27 +34,6 @@ def get_nsfr_model(args, train=False):
     IM = build_infer_module(clauses, atoms, lang, m=m, infer_step=2, train=train, device=device)
     # Neuro-Symbolic Forward Reasoner
     NSFR = NSFReasoner(facts_converter=FC, infer_module=IM, atoms=atoms, bk=bk, clauses=clauses, train=train)
-    return NSFR
-
-
-def get_nsfr(mode, rule):
-    current_path = os.path.dirname(__file__)
-    lark_path = os.path.join(current_path, 'lark/exp.lark')
-    lang_base_path = os.path.join(current_path, 'data/lang/')
-
-    device = torch.device('cuda:0')
-    lang, clauses, bk, atoms = get_lang(
-        lark_path, lang_base_path, mode, rule)
-    if mode == 'getout':
-        VM = CJValuationModule(lang=lang, device=device)
-    elif mode == 'threefish':
-        VM = BFValuationModule(lang=lang, device=device)
-    FC = FactsConverter(lang=lang, valuation_module=VM, device=device)
-    m = len(clauses)
-    # m = 5
-    IM = build_infer_module(clauses, atoms, lang, m=m, infer_step=2, train=True, device=device)
-    # Neuro-Symbolic Forward Reasoner
-    NSFR = NSFReasoner(facts_converter=FC, infer_module=IM, atoms=atoms, bk=bk, clauses=clauses, train=True)
     return NSFR
 
 
@@ -148,3 +114,17 @@ def extract_for_cgen_explaining(coin_jump):
     extracted_states = simulate_prob(extracted_states, num_of_object, key_picked)
 
     return torch.tensor(extracted_states, device="cuda:0")
+
+
+def load_module(path: str):
+    spec = importlib.util.spec_from_file_location("module", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["module.name"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def bool_to_probs(bool_tensor: torch.Tensor):
+    """Converts the values of a tensor from Boolean to probability values by
+     slightly 'smoothing' them (1 to 0.99 and 0 to 0.01)."""
+    return torch.where(bool_tensor, 0.99, 0.01)

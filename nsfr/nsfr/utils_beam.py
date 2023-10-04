@@ -1,12 +1,7 @@
-import os
 from .facts_converter import FactsConverter
 from .nsfr_beam import NSFReasoner
 from .logic_utils import build_infer_module, build_clause_infer_module, build_clause_body_infer_module
-from .valuation_cj import CJValuationModule
-from .valuation_bf import BFValuationModule
-from .valuation_h import HValuationModule
-from .valuation_hh import HHValuationModule
-from nsfr.logic_utils import get_lang
+from valuation import ValuationModule
 
 
 def update_initial_clauses(clauses, obj_num):
@@ -18,9 +13,11 @@ def update_initial_clauses(clauses, obj_num):
 
 
 def get_nsfr_model(args, lang, clauses, atoms, bk, bk_clauses, device, train=False):
-    VM = CJValuationModule(lang=lang, device=device)
-    FC = FactsConverter(lang=lang,
-                        valuation_module=VM, device=device)
+    env_name = args.m
+    val_fn_path = f"example/valuation/{env_name}.py"
+    val_module = ValuationModule(val_fn_path, lang, device)
+
+    FC = FactsConverter(lang=lang, valuation_module=val_module, device=device)
     IM = build_infer_module(clauses, atoms, lang,
                             m=args.m, infer_step=2, device=device, train=train)
     CIM = build_clause_infer_module(clauses, bk_clauses, atoms, lang,
@@ -32,17 +29,11 @@ def get_nsfr_model(args, lang, clauses, atoms, bk, bk_clauses, device, train=Fal
 
 
 def get_nsfr_cgen_model(args, lang, clauses, atoms, bk, device, train=False):
-    if args.m == 'getout':
-        VM = CJValuationModule(lang=lang, device=device)
-    elif args.m == 'threefish':
-        VM = BFValuationModule(lang=lang, device=device)
-    elif args.m == 'loot':
-        if args.env == "loothard":
-            VM = HHValuationModule(lang=lang, device=device)
-        else:
-            VM = HValuationModule(lang=lang, device=device)
-    FC = FactsConverter(lang=lang,
-                        valuation_module=VM, device=device)
+    env_name = args.m
+    val_fn_path = f"example/valuation/{env_name}.py"
+    val_module = ValuationModule(val_fn_path, lang, device)
+
+    FC = FactsConverter(lang=lang, valuation_module=val_module, device=device)
     IM = build_infer_module(clauses, atoms, lang,
                             m=args.m, infer_step=2, device=device, train=train)
     CIM = build_clause_body_infer_module(clauses, atoms, lang, device=device)
