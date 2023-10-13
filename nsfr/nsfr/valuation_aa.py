@@ -88,7 +88,6 @@ class AAValuationModule(nn.Module):
         vfs['on_odd'] = v_onodd
         layers.append(v_onodd)
 
-
         return nn.ModuleList(layers), vfs
 
     def forward(self, zs, atom):
@@ -116,8 +115,16 @@ class AAValuationModule(nn.Module):
                 zs (tensor): The object-centric representation.
         """
         term_index = self.lang.term_index(term)
-        if term.dtype.name == 'object':
-            return zs[:, term_index]
+        import re
+        pattern = 'obj([1-9][0-9]*)'
+        # check if the constant name is the reserved style e.g. obj1
+        result = re.match(pattern, term.name)
+
+        if not result == None:
+            # it is an object constant
+            obj_id = result[1]
+            obj_index = int(obj_id) - 1
+            return zs[:, obj_index]
         elif term.dtype.name == 'image':
             return zs
         else:
