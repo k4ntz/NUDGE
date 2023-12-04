@@ -5,11 +5,11 @@ import numpy as np
 import sys
 
 sys.path.insert(0, '../')
-from src.utils import make_deterministic
-from src.environments.getout.getout.imageviewer import ImageViewer
-from src.environments.getout.getout.getout.helpers import create_getout_instance
+from nudge.utils import make_deterministic
+from nudge.environments.getout.getout.imageviewer import ImageViewer
+from nudge.environments.getout.getout.getout.helpers import create_getout_instance
 from nsfr.utils import get_nsfr_model, get_predictions
-from src.agents.utils_getout import extract_logic_state_getout
+from nudge.agents.utils_getout import extract_logic_state_getout
 
 KEY_SPACE = 32
 KEY_w = 119

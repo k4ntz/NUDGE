@@ -1,8 +1,8 @@
 import time
 
-from src.getout.getout.getout import Getout
-from src.getout.getout.getout import DummyGenerator
-from src.getout.getout.getout import GetoutActions
+from nudge.getout.getout.getout import Getout
+from nudge.getout.getout.getout import DummyGenerator
+from nudge.getout.getout.getout import GetoutActions
 
 def run():
     coin_jump = Getout(render=False)

@@ -98,7 +98,7 @@ def parse_args():
         current_path = os.path.dirname(__file__)
         model_name = input('Enter file name: ')
         model_file = os.path.join(current_path, 'models', args.m, 'ppo', model_name)
-        # model_file = f"../src/ppo_getout_model/{input('Enter file name: ')}"
+        # model_file = f"../nudge/ppo_getout_model/{input('Enter file name: ')}"
 
     else:
         model_file = pathlib.Path(args.model_file)

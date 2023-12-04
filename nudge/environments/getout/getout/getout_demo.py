@@ -4,10 +4,10 @@ import time
 import numpy as np
 from imageviewer import ImageViewer
 
-from src.environments.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
-from src.environments.getout.getout.getout.getout import Getout
+from nudge.environments.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
+from nudge.environments.getout.getout.getout.getout import Getout
 
-from src.environments.getout.getout.getout.actions import GetoutActions
+from nudge.environments.getout.getout.getout.actions import GetoutActions
 
 KEY_SPACE = 32
 #KEY_SPACE = 32

@@ -3,11 +3,11 @@ from argparse import ArgumentParser
 import pathlib
 import pickle
 
-from src.getout.getout.getout import CJA_NOOP
+from nudge.getout.getout.getout import CJA_NOOP
 from imageviewer import ImageViewer
 
-from src.getout.getout.getout import ParameterizedLevelGenerator
-from src.getout.getout.getout import Getout
+from nudge.getout.getout.getout import ParameterizedLevelGenerator
+from nudge.getout.getout.getout import Getout
 
 import os
 

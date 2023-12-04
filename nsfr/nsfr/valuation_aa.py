@@ -39,7 +39,7 @@ class AAValuationModule(nn.Module):
         v_closeby = ClosebyValuationFunction(device)
         vfs['closeby'] = v_closeby
         # vfs['closeby'].load_state_dict(torch.load(
-        #     '../src/weights/neural_predicates/closeby_pretrain.pt', map_location=device))
+        #     '../nudge/weights/neural_predicates/closeby_pretrain.pt', map_location=device))
         # vfs['closeby'].eval()
         layers.append(v_closeby)
         # print('Pretrained  neural predicate closeby have been loaded!')

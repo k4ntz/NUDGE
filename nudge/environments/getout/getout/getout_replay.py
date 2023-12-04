@@ -7,8 +7,8 @@ import pickle
 import numpy as np
 from imageviewer import ImageViewer
 
-from src.getout.getout.getout import ParameterizedLevelGenerator
-from src.getout.getout.getout import Getout
+from nudge.getout.getout.getout import ParameterizedLevelGenerator
+from nudge.getout.getout.getout import Getout
 
 KEY_SPACE = 32
 KEY_w = 119

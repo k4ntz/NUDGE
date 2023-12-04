@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     package_data={'': extra_files},
     include_package_data=True,
-    # package_dir={'':'src'},
+    # package_dir={'':'nudge'},
     url='tba',
     description='Neuro Symbolic Forward Reasonner',
     long_description=open('README.md').read(),

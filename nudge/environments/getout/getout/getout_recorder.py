@@ -5,10 +5,10 @@ import pickle
 
 import numpy as np
 
-from src.getout.getout.getout import create_getout_instance
+from nudge.getout.getout.getout import create_getout_instance
 from imageviewer import ImageViewer
 
-from src.getout.getout.getout import GetoutActions
+from nudge.getout.getout.getout import GetoutActions
 
 KEY_SPACE = 32
 KEY_w = 119
