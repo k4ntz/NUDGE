@@ -4,13 +4,13 @@ import torch.nn as nn
 import random
 import pickle
 
+from nsfr.utils.common import load_module
 from torch.distributions import Categorical
 from .MLPController.mlpgetout import MLPGetout
 from .MLPController.mlpthreefish import MLPThreefish
 from .MLPController.mlploot import MLPLoot
-from .utils_threefish import simplify_action_bf, action_map_threefish
-from .utils_loot import simplify_action_loot, action_map_loot
-from .utils_getout import action_map_getout
+from envs.threefish.actions import simplify_action_bf
+from envs.loot.actions import simplify_action_loot
 from envs.getout.state_extraction import extract_neural_state as extract_neural_state_getout
 from envs.loot.state_extraction import extract_neural_state as extract_neural_state_loot
 from envs.threefish.state_extraction import extract_neural_state as extract_neural_state_threefish
@@ -87,24 +87,20 @@ class NeuralPPO:
 
         self.MseLoss = nn.MSELoss()
 
-    def select_action(self, state, epsilon=0.0):
+        env_name = self.args.env
 
-        # extract state info for different games
-        if self.args.m == 'getout':
-            state = extract_neural_state_getout(state, self.args)
-            # model_input = sample_to_model_input((extract_state(state), []))
-            # model_input = collate([model_input])
-            # state = model_input['state']
-            # state = torch.cat([state['base'], state['entities']], dim=1)
-        elif self.args.m == 'threefish':
-            state = extract_neural_state_threefish(state, self.args)
-            # state = state['positions'].reshape(-1)
-            # state = torch.tensor(state.tolist()).to(device)
-        elif self.args.m == 'loot':
-            state = extract_neural_state_loot(state, self.args)
-            # state = state['positions'].reshape(-1)
-            # state = torch.tensor(state.tolist()).to(device)
-        # select random action with epsilon probability and policy probiability with 1-epsilon
+        state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
+        module = load_module(state_extraction_module_path)
+        self.extract_neural_state = module.extract_neural_state
+
+        action_mapping_module_path = f"../envs/{env_name}/actions.py"
+        module = load_module(action_mapping_module_path)
+        self.map_action = module.map_action
+
+    def select_action(self, state, epsilon=0.0):
+        state = self.extract_neural_state(state, variant=self.args.env)  # TODO: rename args.env
+
+        # select random action with epsilon probability and policy probability with 1-epsilon
         with torch.no_grad():
             # state = torch.FloatTensor(state).to(device)
             action, action_logprob = self.policy_old.act(state, epsilon=epsilon)
@@ -115,12 +111,7 @@ class NeuralPPO:
         action_logprob = torch.squeeze(action_logprob)
         self.buffer.logprobs.append(action_logprob)
 
-        if self.args.m == 'getout':
-            action = action_map_getout(action.item(), self.args)
-        elif self.args.m == 'threefish':
-            action = action_map_threefish(action.item(), self.args)
-        elif self.args.m == 'loot':
-            action = action_map_loot(action.item(), self.args)
+        action = self.map_action(action.item(), self.args)
 
         return action
 

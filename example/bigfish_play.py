@@ -5,9 +5,9 @@ import sys
 sys.path.insert(0,'../')
 from nudge.utils import make_deterministic
 from nudge.environments.procgen.procgen import ProcgenGym3Env
-from nsfr.utils import get_predictions
+from nsfr.utils.common import get_predictions
 from nsfr.common import get_nsfr_model
-from nudge.agents.utils_threefish import extract_logic_state_threefish
+from envs.threefish.state_extraction import extract_logic_state as extract_logic_state_threefish
 
 
 def explaining_to_action(explaining):

@@ -1,20 +1,16 @@
 import numpy as np
-import torch
-
-device = torch.device('cuda:0')
 
 
-def simplify_action_loot(action):
-    """simplify 9 actions to 5 actions
+def simplify_action_bf(action):
+    """simplify actions from 9 to 5
     """
-    #          left,down,idle,up,right
     # model_ouput  [0, 1, 2, 3, 4]
     action_space = [1, 3, 4, 5, 7]
     action = action_space[action]
     return np.array([action])
 
 
-def preds_to_action_loot(action, prednames):
+def preds_to_action_threefish(action, prednames):
     """
     map explaining to action
     action_space = [1, 3, 4, 5, 7]
@@ -31,10 +27,10 @@ def preds_to_action_loot(action, prednames):
         return np.array([4])
 
 
-def action_map_loot(prediction, args, prednames=None):
+def map_action(prediction, alg, prednames=None):
     """map model action to game action"""
-    if args.alg == 'ppo':
-        action = simplify_action_loot(prediction)
-    elif args.alg == 'logic':
-        action = preds_to_action_loot(prediction, prednames)
+    if alg == 'ppo':
+        action = simplify_action_bf(prediction)
+    elif alg == 'logic':
+        action = preds_to_action_threefish(prediction, prednames)
     return action

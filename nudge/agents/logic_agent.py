@@ -13,10 +13,6 @@ from .MLPController.mlpatari import MLPAtari
 from .MLPController.mlpgetout import MLPGetout
 from .MLPController.mlploot import MLPLoot
 from .MLPController.mlpthreefish import MLPThreefish
-from .utils_atari import action_map_atari
-from .utils_getout import action_map_getout
-from .utils_loot import action_map_loot
-from .utils_threefish import action_map_threefish
 
 
 class NSFR_ActorCritic(nn.Module):
@@ -93,6 +89,13 @@ class LogicPPO:
         self.MseLoss = nn.MSELoss()
         self.prednames = self.get_prednames()
 
+        # Different games use different action system, need to map it to the correct action.
+        # action of logic game means a String, need to map string to the correct action,
+        env_name = self.args.env
+        action_mapping_module_path = f"../envs/{env_name}/actions.py"
+        module = load_module(action_mapping_module_path)
+        self.map_action = module.map_action
+
     def extract_states(self, raw_state):
         """Extracts the logic and the neural state representation of the given raw state.
         The extraction depends on the environment."""
@@ -123,17 +126,7 @@ class LogicPPO:
         action_logprob = torch.squeeze(action_logprob)
         self.buffer.logprobs.append(action_logprob)
 
-        # different games use different action system, need to map it to the correct action.
-        # action of logic game means a String, need to map string to the correct action,
-        action = action.item()
-        if self.args.m == 'getout':
-            action = action_map_getout(action, self.args, self.prednames)
-        elif self.args.m == 'threefish':
-            action = action_map_threefish(action, self.args, self.prednames)
-        elif self.args.m == 'loot':
-            action = action_map_loot(action, self.args, self.prednames)
-        elif self.args.m == 'atari':
-            action = action_map_atari(action, self.args, self.prednames)
+        action = self.map_action(action.item(), self.args.alg, self.prednames)
 
         return action
 
