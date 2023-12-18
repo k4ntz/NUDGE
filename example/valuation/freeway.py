@@ -2,7 +2,7 @@ import torch
 from nsfr.utils import bool_to_probs
 
 
-def obj_type(z: torch.Tensor, a: torch.Tensor) -> torch.Tensor:
+def type(z: torch.Tensor, a: torch.Tensor) -> torch.Tensor:
     z_type = z[:, 0:2]  # [1, 0, 0, 0] * [1.0, 0, 0, 0] .sum = 0.0  type(obj1, key):0.0
     prob = (a * z_type).sum(dim=1)
     return prob

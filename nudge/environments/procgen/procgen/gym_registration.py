@@ -1,4 +1,4 @@
-from gym.envs.registration import register
+from gymnasium.envs.registration import register
 from gym3 import ToGymEnv, ViewerWrapper, ExtractDictObWrapper
 from .env import ENV_NAMES, ProcgenGym3Env
 

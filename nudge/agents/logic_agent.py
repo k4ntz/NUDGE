@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 
-from nsfr.utils import get_nsfr_model
+from nsfr.common import get_nsfr_model
 
 from .MLPController.mlpatari import MLPAtari
 from .MLPController.mlpgetout import MLPGetout

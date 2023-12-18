@@ -13,7 +13,7 @@ def update_initial_clauses(clauses, obj_num):
 
 
 def get_nsfr_model(args, lang, clauses, atoms, bk, bk_clauses, device, train=False):
-    env_name = args.m
+    env_name = args.env
     val_fn_path = f"example/valuation/{env_name}.py"
     val_module = ValuationModule(val_fn_path, lang, device)
 
@@ -29,7 +29,7 @@ def get_nsfr_model(args, lang, clauses, atoms, bk, bk_clauses, device, train=Fal
 
 
 def get_nsfr_cgen_model(args, lang, clauses, atoms, bk, device, train=False):
-    env_name = args.m
+    env_name = args.env
     val_fn_path = f"example/valuation/{env_name}.py"
     val_module = ValuationModule(val_fn_path, lang, device)
 

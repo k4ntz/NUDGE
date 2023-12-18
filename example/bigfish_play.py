@@ -5,7 +5,8 @@ import sys
 sys.path.insert(0,'../')
 from nudge.utils import make_deterministic
 from nudge.environments.procgen.procgen import ProcgenGym3Env
-from nsfr.utils import get_nsfr_model, get_predictions
+from nsfr.utils import get_predictions
+from nsfr.common import get_nsfr_model
 from nudge.agents.utils_threefish import extract_logic_state_threefish
 
 
