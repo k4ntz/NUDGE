@@ -43,6 +43,8 @@ def explaining_to_action(explaining):
 
 
 def run():
+    device = "cuda:0"
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--seed", help="Seed for pytorch + env", default=0,
                         required=False, action="store", dest="seed", type=int)
@@ -74,7 +76,7 @@ def run():
     last_frame_time = 0
     last_explaining = None
 
-    nsfr = get_nsfr_model(args, train=False)
+    nsfr = get_nsfr_model(args, device=device, train=False)
     while True:
         # control framerate
         current_frame_time = time.time()

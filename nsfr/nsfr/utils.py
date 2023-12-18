@@ -3,8 +3,6 @@ import numpy as np
 import importlib.util
 import sys
 
-device = torch.device('cuda:0')
-
 
 def explaining_nsfr(NSFR, extracted_states):
     V_T = NSFR(extracted_states)

@@ -13,13 +13,12 @@ from .utils_getout import extract_state, sample_to_model_input, collate, action_
 from .utils_threefish import simplify_action_bf, action_map_threefish, extract_neural_state_threefish
 from .utils_loot import simplify_action_loot, action_map_loot, extract_neural_state_loot
 
-device = torch.device('cuda:0')
-
 
 class ActorCritic(nn.Module):
-    def __init__(self, args, rng=None):
+    def __init__(self, args, rng=None, device=None):
         super(ActorCritic, self).__init__()
 
+        self.device = device
         self.rng = random.Random() if rng is None else rng
         self.args = args
         if self.args.m == 'getout':
@@ -67,20 +66,21 @@ class ActorCritic(nn.Module):
 
 
 class NeuralPPO:
-    def __init__(self, lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args):
+    def __init__(self, lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device=None):
 
+        self.device = device
         self.gamma = gamma
         self.eps_clip = eps_clip
         self.K_epochs = K_epochs
         self.args = args
         self.buffer = RolloutBuffer()
-        self.policy = ActorCritic(self.args).to(device)
+        self.policy = ActorCritic(self.args, device=device)
         self.optimizer = optimizer([
             {'params': self.policy.actor.parameters(), 'lr': lr_actor},
             {'params': self.policy.critic.parameters(), 'lr': lr_critic}
         ])
 
-        self.policy_old = ActorCritic(self.args).to(device)
+        self.policy_old = ActorCritic(self.args, device=device)
         self.policy_old.load_state_dict(self.policy.state_dict())
 
         self.MseLoss = nn.MSELoss()
@@ -133,13 +133,13 @@ class NeuralPPO:
             rewards.insert(0, discounted_reward)
 
         # Normalizing the rewards
-        rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
 
         # convert list to tensor
-        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
-        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
-        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
+        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(self.device)
+        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(self.device)
+        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(self.device)
 
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):

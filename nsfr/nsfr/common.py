@@ -3,11 +3,10 @@ import os
 from nsfr.facts_converter import FactsConverter
 from nsfr.logic_utils import get_lang, build_infer_module
 from nsfr.nsfr import NSFReasoner
-from nsfr.utils import device
 from nsfr.valuation import ValuationModule
 
 
-def get_nsfr_model(args, train=False):
+def get_nsfr_model(args, device, train=False):
     env_name = args.env
 
     current_path = os.path.dirname(__file__)

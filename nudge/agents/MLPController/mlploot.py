@@ -4,10 +4,10 @@ import numpy as np
 
 class MLPLoot(torch.nn.Module):
 
-    def __init__(self, has_softmax=False, out_size=5, logic=False):
+    def __init__(self, has_softmax=False, out_size=5, logic=False, device=None):
         super().__init__()
         self.logic = logic
-        self.device = torch.device('cuda:0')
+        self.device = device
         encoding_max_entities = 7
         encoding_entity_features = 4
         self.num_in_features = encoding_entity_features * encoding_max_entities

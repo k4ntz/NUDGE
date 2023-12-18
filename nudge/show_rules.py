@@ -8,12 +8,10 @@ from agents.neural_agent import ActorCritic, NeuralPlayer
 from agents.logic_agent import NSFR_ActorCritic, LogicPlayer
 from agents.random_agent import RandomPlayer
 
-device = torch.device('cuda:0')
 
-
-def load_model(model_path, args, set_eval=True):
+def load_model(model_path, args, device, set_eval=True):
     with open(model_path, "rb") as f:
-        model = NSFR_ActorCritic(args).to(device)
+        model = NSFR_ActorCritic(args, device=device).to(device)
         model.load_state_dict(state_dict=torch.load(f))
 
     model = model.actor
@@ -26,6 +24,8 @@ def load_model(model_path, args, set_eval=True):
 
 
 def main():
+    device = torch.device('cuda:0')
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--seed", help="Seed for pytorch + env", default=0,
                         required=False, action="store", dest="seed", type=int)
@@ -70,7 +70,7 @@ def main():
         print(f"Please use one of the following agent: {os.listdir(models_folder)}")
         model_name = input('Enter file name: ')
     model_file = os.path.join(current_path, 'models', args.m, args.alg, model_name)
-    model = load_model(model_file, args)
+    model = load_model(model_file, args, device=device)
 
     agent = LogicPlayer(args, model)
 

@@ -23,15 +23,14 @@ from .utils_threefish import (action_map_threefish,
                               extract_neural_state_threefish,
                               preds_to_action_threefish)
 
-device = torch.device('cuda:0')
-
 
 class NSFR_ActorCritic(nn.Module):
-    def __init__(self, args, rng=None):
+    def __init__(self, args, device, rng=None):
         super(NSFR_ActorCritic, self).__init__()
+        self.device =device
         self.rng = random.Random() if rng is None else rng
         self.args = args
-        self.actor = get_nsfr_model(self.args, train=True)
+        self.actor = get_nsfr_model(self.args, device=device, train=True)
         self.prednames = self.get_prednames()
         if self.args.m == 'threefish':
             self.critic = MLPThreefish(out_size=1, logic=True)
@@ -43,9 +42,9 @@ class NSFR_ActorCritic(nn.Module):
             self.critic = MLPAtari(out_size=1, logic=True)
         self.num_actions = len(self.prednames)
         self.uniform = Categorical(
-            torch.tensor([1.0 / self.num_actions for _ in range(self.num_actions)], device="cuda"))
+            torch.tensor([1.0 / self.num_actions for _ in range(self.num_actions)], device=device))
         self.upprior = Categorical(
-            torch.tensor([0.9] + [0.1 / (self.num_actions-1) for _ in range(self.num_actions-1)], device="cuda"))
+            torch.tensor([0.9] + [0.1 / (self.num_actions-1) for _ in range(self.num_actions-1)], device=device))
 
     def forward(self):
         raise NotImplementedError
@@ -60,7 +59,7 @@ class NSFR_ActorCritic(nn.Module):
             action = dist.sample()
         else:
             dist = Categorical(action_probs)
-            action = (action_probs[0] == max(action_probs[0])).nonzero(as_tuple=True)[0].squeeze(0).to(device)
+            action = (action_probs[0] == max(action_probs[0])).nonzero(as_tuple=True)[0].squeeze(0).to(self.device)
             if torch.numel(action) > 1:
                 action = action[0]
         # action = dist.sample()
@@ -81,20 +80,20 @@ class NSFR_ActorCritic(nn.Module):
 
 
 class LogicPPO:
-    def __init__(self, lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args):
-
+    def __init__(self, lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device=None):
+        self.device = device
         self.gamma = gamma
         self.eps_clip = eps_clip
         self.K_epochs = K_epochs
         self.buffer = RolloutBuffer()
         self.args = args
-        self.policy = NSFR_ActorCritic(self.args).to(device)
+        self.policy = NSFR_ActorCritic(self.args, device=device).to(device)
         self.optimizer = optimizer([
             {'params': self.policy.actor.get_params(), 'lr': lr_actor},
             {'params': self.policy.critic.parameters(), 'lr': lr_critic}
         ])
 
-        self.policy_old = NSFR_ActorCritic(self.args).to(device)
+        self.policy_old = NSFR_ActorCritic(self.args, device=device).to(device)
         self.policy_old.load_state_dict(self.policy.state_dict())
         self.MseLoss = nn.MSELoss()
         self.prednames = self.get_prednames()
@@ -113,8 +112,8 @@ class LogicPPO:
             logic_state = extract_logic_state_loot(state, self.args)
             neural_state = extract_neural_state_loot(state, self.args)
         elif self.args.m == 'atari':
-            logic_state = extract_logic_state_atari(state, self.args)
-            neural_state = extract_neural_state_atari(state, self.args)
+            logic_state = extract_logic_state_atari(state, self.args, device=self.device)
+            neural_state = extract_neural_state_atari(state, self.args, device=self.device)
 
         # select random action with epsilon probability and policy probiability with 1-epsilon
         with torch.no_grad():
@@ -154,15 +153,15 @@ class LogicPPO:
             rewards.insert(0, discounted_reward)
 
         # Normalizing the rewards
-        rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
 
         # convert list to tensor
 
-        old_neural_states = torch.squeeze(torch.stack(self.buffer.neural_states, dim=0)).detach().to(device)
-        old_logic_states = torch.squeeze(torch.stack(self.buffer.logic_states, dim=0)).detach().to(device)
-        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
-        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
+        old_neural_states = torch.squeeze(torch.stack(self.buffer.neural_states, dim=0)).detach().to(self.device)
+        old_logic_states = torch.squeeze(torch.stack(self.buffer.logic_states, dim=0)).detach().to(self.device)
+        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(self.device)
+        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(self.device)
 
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):

@@ -25,6 +25,8 @@ def explaining_to_action(explaining):
 
 
 def run():
+    device = "cuda:0"
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--seed", help="Seed for pytorch + env", default=0,
                         required=False, action="store", dest="seed", type=int)
@@ -45,7 +47,7 @@ def run():
     env = ProcgenGym3Env(num=1, env_name=args.env, render_mode="rgb_array")
     env = gym3.ViewerWrapper(env, info_key="rgb")
 
-    nsfr = get_nsfr_model(args)
+    nsfr = get_nsfr_model(args, device=device)
 
     NB_DONE = 0
     TO_SUCCEED = 1

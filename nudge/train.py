@@ -29,6 +29,8 @@ import datetime
 
 
 def main():
+    device = "cpu"
+
     ################### args definition ###################
     parser = argparse.ArgumentParser()
 
@@ -176,9 +178,9 @@ def main():
     #
     # initialize agent
     if args.alg == "ppo":
-        agent = NeuralPPO(lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args)
+        agent = NeuralPPO(lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device)
     elif args.alg == "logic":
-        agent = LogicPPO(lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args)
+        agent = LogicPPO(lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device)
         print('Candidate Clauses:')
         for clause in agent.policy.actor.clauses:
             print(clause)
@@ -229,7 +231,7 @@ def main():
 
     # Start the RTPT tracking
     folder_name = f"{args.m}_{args.env}_{args.alg}_{args.rules}_s{args.seed}"
-    folder_name += datetime.datetime.now().strftime("%m%d-%H:%M")
+    folder_name += datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
     writer = SummaryWriter(f"runs/{folder_name}")
     rtpt.start()
     # training loop

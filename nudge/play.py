@@ -17,7 +17,7 @@ def load_model(model_path, args, set_eval=True):
         if args.alg == 'ppo':
             model = ActorCritic(args).to(device)
         elif args.alg == 'logic':
-            model = NSFR_ActorCritic(args).to(device)
+            model = NSFR_ActorCritic(args, device=device).to(device)
         model.load_state_dict(state_dict=torch.load(f))
         if args.alg == 'logic':
             model.actor.print_program()

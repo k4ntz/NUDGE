@@ -4,11 +4,11 @@ import numpy as np
 
 class MLPGetout(torch.nn.Module):
 
-    def __init__(self, has_softmax=False, out_size=3, as_dict=False, logic=False):
+    def __init__(self, has_softmax=False, out_size=3, as_dict=False, logic=False, device=None):
         super().__init__()
         self.logic = logic
         self.as_dict = as_dict
-        self.device = torch.device('cuda:0')
+        self.device = device
         encoding_base_features = 6
         encoding_entity_features = 9
         encoding_max_entities = 6
