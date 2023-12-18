@@ -1,16 +1,4 @@
-def preds_to_action_getout(action, prednames):
-    """
-    map explaining to action
-    0:jump
-    1:left_go_get_key
-    2:right_go_get_key
-    3:left_go_to_door
-    4:right_go_to_door
-
-    CJA_MOVE_LEFT: Final[int] = 1
-    CJA_MOVE_RIGHT: Final[int] = 2
-    CJA_MOVE_UP: Final[int] = 3
-    """
+def pred2action(action, prednames):
     if 'jump' in prednames[action]:
         return 3
     elif 'left' in prednames[action]:

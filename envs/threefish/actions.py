@@ -10,11 +10,7 @@ def simplify_action_bf(action):
     return np.array([action])
 
 
-def preds_to_action_threefish(action, prednames):
-    """
-    map explaining to action
-    action_space = [1, 3, 4, 5, 7]
-    """
+def pred2action(action, prednames):
     if 'up' in prednames[action]:
         return np.array([5])
     elif 'down' in prednames[action]:

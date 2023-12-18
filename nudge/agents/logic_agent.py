@@ -214,17 +214,21 @@ class LogicPlayer:
         self.prednames = model.get_prednames()
 
         env_name = self.args.env
+
         state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
         module = load_module(state_extraction_module_path)
         self.extract_logic_state = module.extract_logic_state
-        self.preds_to_action = ...  # TODO
+
+        action_mapping_module_path = f"../envs/{env_name}/actions.py"
+        module = load_module(action_mapping_module_path)
+        self.pred2action = module.pred2action
 
     def act(self, state):
         extracted_state = self.extract_logic_state(state, variant=self.args.env)  # TODO: rename arg.env
         predictions = self.model(extracted_state)
         prediction = torch.argmax(predictions).cpu().item()
         explaining = self.prednames[prediction]
-        action = self.preds_to_action(prediction, self.prednames)
+        action = self.pred2action(prediction, self.prednames)
         return action, explaining
 
     def get_probs(self):

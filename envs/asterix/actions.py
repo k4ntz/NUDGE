@@ -1,4 +1,4 @@
-def preds_to_action_atari(action, prednames):
+def pred2action(action, prednames):
     if 'noop' in prednames[action]:
         return 0
     elif 'up' in prednames[action]:
