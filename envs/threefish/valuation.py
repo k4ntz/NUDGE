@@ -1,5 +1,5 @@
 import torch
-from example.valuation._util import fuzzy_position
+from nsfr.utils.valuation import fuzzy_position
 
 
 def obj_type(z, a):

@@ -4,61 +4,6 @@ import torch
 device = torch.device('cuda:0')
 
 
-def extract_logic_state_threefish(obs, args):
-    """
-    reshape states for nsfr
-    """
-    states = torch.from_numpy(obs['positions']).squeeze()
-    if args.alg == 'logic':
-        if args.env == "threefish":
-            # input shape: [X,Y,radius]
-            # output shape:[agent, fish, radius, X, Y]
-            extracted_state = torch.zeros((3, 5))
-            for i, state in enumerate(states):
-                if i == 0:
-                    extracted_state[i, 0] = 1  # agent
-                    extracted_state[i, 2] = states[i, 2]  # radius
-                    extracted_state[i, 3] = states[i, 0]  # X
-                    extracted_state[i, 4] = states[i, 1]  # Y
-                else:
-                    extracted_state[i, 1] = 1  # fish
-                    extracted_state[i, 2] = states[i, 2]  # radius
-                    extracted_state[i, 3] = states[i, 0]  # X
-                    extracted_state[i, 4] = states[i, 1]  # Y
-
-            extracted_state = extracted_state.unsqueeze(0)
-            return extracted_state.cuda()
-        elif args.env == "threefishcolor":
-            # input shape: [X, Y, color, radius]
-            # output shape: [agent, fish, green, red,radius, X, Y]
-            extracted_state = torch.zeros((3, 7))
-            for i, state in enumerate(states):
-                if i == 0:
-                    extracted_state[i, 0] = 1  # agent
-                    extracted_state[i, -3] = states[i, 3]  # radius
-                    extracted_state[i, -2] = states[i, 0]  # X
-                    extracted_state[i, -1] = states[i, 1]  # Y
-                else:
-                    extracted_state[i, 1] = 1  # fish
-                    if states[i, 2] == 1:
-                        extracted_state[i, 2] = 1  # green
-                    else:
-                        extracted_state[i, 3] = 1  # red
-                    extracted_state[i, -3] = states[i, 3]  # radius
-                    extracted_state[i, -2] = states[i, 0]  # X
-                    extracted_state[i, -1] = states[i, 1]  # Y
-
-            extracted_state = extracted_state.unsqueeze(0)
-            return extracted_state.cuda()
-
-
-def extract_neural_state_threefish(state, args):
-    state = state['positions'][:,:,0:3].reshape(-1)
-    state = state.tolist()
-
-    return torch.tensor(state).to(device)
-
-
 def simplify_action_bf(action):
     """simplify actions from 9 to 5
     """

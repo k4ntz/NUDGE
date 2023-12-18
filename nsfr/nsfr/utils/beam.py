@@ -1,7 +1,7 @@
-from .facts_converter import FactsConverter
-from .nsfr_beam import NSFReasoner
-from .logic_utils import build_infer_module, build_clause_infer_module, build_clause_body_infer_module
-from valuation import ValuationModule
+from nsfr.facts_converter import FactsConverter
+from nsfr.nsfr_beam import NSFReasoner
+from logic import build_infer_module, build_clause_infer_module, build_clause_body_infer_module
+from nsfr.valuation import ValuationModule
 
 
 def update_initial_clauses(clauses, obj_num):

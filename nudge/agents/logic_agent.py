@@ -7,21 +7,16 @@ import torch.nn as nn
 from torch.distributions import Categorical
 
 from nsfr.common import get_nsfr_model
+from nsfr.utils.common import load_module
 
 from .MLPController.mlpatari import MLPAtari
 from .MLPController.mlpgetout import MLPGetout
 from .MLPController.mlploot import MLPLoot
 from .MLPController.mlpthreefish import MLPThreefish
-from .utils_atari import (action_map_atari, extract_logic_state_atari,
-                          extract_neural_state_atari, preds_to_action_atari)
-from .utils_getout import (action_map_getout, extract_logic_state_getout,
-                           extract_neural_state_getout, preds_to_action_getout)
-from .utils_loot import (action_map_loot, extract_logic_state_loot,
-                         extract_neural_state_loot, preds_to_action_loot)
-from .utils_threefish import (action_map_threefish,
-                              extract_logic_state_threefish,
-                              extract_neural_state_threefish,
-                              preds_to_action_threefish)
+from .utils_atari import action_map_atari
+from .utils_getout import action_map_getout
+from .utils_loot import action_map_loot
+from .utils_threefish import action_map_threefish
 
 
 class NSFR_ActorCritic(nn.Module):
@@ -98,22 +93,22 @@ class LogicPPO:
         self.MseLoss = nn.MSELoss()
         self.prednames = self.get_prednames()
 
-    def select_action(self, state, epsilon=0.0):
+    def extract_states(self, raw_state):
+        """Extracts the logic and the neural state representation of the given raw state.
+        The extraction depends on the environment."""
+        env_name = self.args.env
+        state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
+        module = load_module(state_extraction_module_path)
 
-        # extract state for different games
-        # import ipdb; ipdb.set_trace()
-        if self.args.m == 'getout':
-            logic_state = extract_logic_state_getout(state, self.args)
-            neural_state = extract_neural_state_getout(state, self.args)
-        elif self.args.m == 'threefish':
-            logic_state = extract_logic_state_threefish(state, self.args)
-            neural_state = extract_neural_state_threefish(state, self.args)
-        elif self.args.m == 'loot':
-            logic_state = extract_logic_state_loot(state, self.args)
-            neural_state = extract_neural_state_loot(state, self.args)
-        elif self.args.m == 'atari':
-            logic_state = extract_logic_state_atari(state, self.args, device=self.device)
-            neural_state = extract_neural_state_atari(state, self.args, device=self.device)
+        logic_state = module.extract_logic_state(raw_state)  # TODO: enable custom args
+        logic_state = torch.tensor(logic_state, dtype=torch.float32, device=self.device).unsqueeze(0)
+        neural_state = module.extract_neural_state(raw_state)  # TODO: enable custom args
+        neural_state = torch.tensor(neural_state, dtype=torch.float32, device=self.device).unsqueeze(0)
+
+        return logic_state, neural_state
+
+    def select_action(self, state, epsilon=0.0):
+        logic_state, neural_state = self.extract_states(state)
 
         # select random action with epsilon probability and policy probiability with 1-epsilon
         with torch.no_grad():
@@ -232,15 +227,18 @@ class LogicPlayer:
         self.model = model
         self.prednames = model.get_prednames()
 
+        env_name = self.args.env
+        state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
+        module = load_module(state_extraction_module_path)
+        self.extract_logic_state = module.extract_logic_state
+        self.preds_to_action = ...  # TODO
+
     def act(self, state):
-        if self.args.m == 'getout':
-            action, explaining = self.getout_actor(state)
-        elif self.args.m == 'threefish':
-            action, explaining = self.threefish_actor(state)
-        elif self.args.m == 'loot':
-            action, explaining = self.loot_actor(state)
-        elif self.args.m == 'atari':
-            action, explaining = self.atari_actor(state)
+        extracted_state = self.extract_logic_state(state, variant=self.args.env)  # TODO: rename arg.env
+        predictions = self.model(extracted_state)
+        prediction = torch.argmax(predictions).cpu().item()
+        explaining = self.prednames[prediction]
+        action = self.preds_to_action(prediction, self.prednames)
         return action, explaining
 
     def get_probs(self):
@@ -251,54 +249,20 @@ class LogicPlayer:
         explaining = 0
         return explaining
 
-    def get_state(self, state):
-        if self.args.m == 'getout':
-            logic_state = extract_logic_state_getout(state, self.args).squeeze(0)
-        elif self.args.m == 'threefish':
-            logic_state = extract_logic_state_threefish(state, self.args).squeeze(0)
-        if self.args.m == 'loot':
-            logic_state = extract_logic_state_loot(state, self.args).squeeze(0)
-        if self.args.m == 'atari':
-            logic_state = extract_logic_state_atari(state, self.args).squeeze(0)
+    def get_state(self, raw_state):
+        env_name = self.args.env
+        state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
+        module = load_module(state_extraction_module_path)
+
+        logic_state = module.extract_logic_state(raw_state)  # TODO: enable custom args
+        logic_state = torch.tensor(logic_state, dtype=torch.float32, device=self.device).unsqueeze(0)
+
         logic_state = logic_state.tolist()
         result = []
         for list in logic_state:
             obj_state = [round(num, 2) for num in list]
             result.append(obj_state)
         return result
-
-    def getout_actor(self, getout):
-        extracted_state = extract_logic_state_getout(getout, self.args)
-        predictions = self.model(extracted_state)
-        prediction = torch.argmax(predictions).cpu().item()
-        explaining = self.prednames[prediction]
-        action = preds_to_action_getout(prediction, self.prednames)
-        return action, explaining
-
-    def atari_actor(self, atari_env):
-        # import ipdb; ipdb.set_trace()
-        extracted_state = extract_logic_state_atari(atari_env, self.args)
-        predictions = self.model(extracted_state)
-        prediction = torch.argmax(predictions).cpu().item()
-        explaining = self.prednames[prediction]
-        action = preds_to_action_atari(prediction, self.prednames)
-        return action, explaining
-
-    def threefish_actor(self, state):
-        state = extract_logic_state_threefish(state, self.args)
-        predictions = self.model(state)
-        action = torch.argmax(predictions)
-        explaining = self.prednames[action.item()]
-        action = preds_to_action_threefish(action, self.prednames)
-        return action, explaining
-
-    def loot_actor(self, state):
-        state = extract_logic_state_loot(state, self.args)
-        predictions = self.model(state)
-        action = torch.argmax(predictions)
-        explaining = self.prednames[action.item()]
-        action = preds_to_action_loot(action, self.prednames)
-        return action, explaining
 
 
 class RolloutBuffer:

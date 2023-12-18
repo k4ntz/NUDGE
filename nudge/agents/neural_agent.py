@@ -8,10 +8,12 @@ from torch.distributions import Categorical
 from .MLPController.mlpgetout import MLPGetout
 from .MLPController.mlpthreefish import MLPThreefish
 from .MLPController.mlploot import MLPLoot
-from .utils_getout import extract_state, sample_to_model_input, collate, action_map_getout, \
-    extract_neural_state_getout
-from .utils_threefish import simplify_action_bf, action_map_threefish, extract_neural_state_threefish
-from .utils_loot import simplify_action_loot, action_map_loot, extract_neural_state_loot
+from .utils_threefish import simplify_action_bf, action_map_threefish
+from .utils_loot import simplify_action_loot, action_map_loot
+from .utils_getout import action_map_getout
+from envs.getout.state_extraction import extract_neural_state as extract_neural_state_getout
+from envs.loot.state_extraction import extract_neural_state as extract_neural_state_loot
+from envs.threefish.state_extraction import extract_neural_state as extract_neural_state_threefish
 
 
 class ActorCritic(nn.Module):

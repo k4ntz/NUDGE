@@ -1,7 +1,7 @@
 import os
 
 from nsfr.facts_converter import FactsConverter
-from nsfr.logic_utils import get_lang, build_infer_module
+from nsfr.utils.logic import get_lang, build_infer_module
 from nsfr.nsfr import NSFReasoner
 from nsfr.valuation import ValuationModule
 
@@ -15,7 +15,7 @@ def get_nsfr_model(args, device, train=False):
 
     lang, clauses, bk, atoms = get_lang(lark_path, lang_base_path, args.m, args.rules)
 
-    val_fn_path = f"../example/valuation/{env_name}.py"
+    val_fn_path = f"../envs/{env_name}/valuation.py"
     val_module = ValuationModule(val_fn_path, lang, device)
 
     FC = FactsConverter(lang=lang, valuation_module=val_module, device=device)

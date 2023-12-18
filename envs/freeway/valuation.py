@@ -1,5 +1,5 @@
 import torch
-from nsfr.utils import bool_to_probs
+from nsfr.utils.common import bool_to_probs
 
 
 def type(z: torch.Tensor, a: torch.Tensor) -> torch.Tensor:

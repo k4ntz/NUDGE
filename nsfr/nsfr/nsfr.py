@@ -1,7 +1,7 @@
 import numpy as np
 import torch.nn as nn
 import torch
-from .logic_utils import get_index_by_predname
+from nsfr.utils.logic import get_index_by_predname
 
 
 class NSFReasoner(nn.Module):

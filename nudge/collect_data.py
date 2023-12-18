@@ -3,18 +3,17 @@ import json
 import torch
 import os
 import pathlib
-import gym3
 
 from argparse import ArgumentParser
 from environments.getout.getout.imageviewer import ImageViewer
 from environments.getout.getout.getout.getout import Getout
 from environments.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
-from agents.utils_getout import extract_state, sample_to_model_input, collate
+from envs.getout.state_extraction import sample_to_model_input, extract_state, collate
 from agents.neural_agent import ActorCritic
 from agents.utils_loot import extract_neural_state_loot, simplify_action_loot, extract_logic_state_loot
 from agents.utils_threefish import extract_logic_state_threefish, extract_neural_state_threefish
 from tqdm import tqdm
-from nsfr.utils import extract_for_cgen_explaining
+from nsfr.utils.common import extract_for_cgen_explaining
 
 from environments.procgen.procgen import ProcgenGym3Env
 

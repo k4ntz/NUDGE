@@ -6,8 +6,8 @@ import re
 import torch
 from torch import nn
 from nsfr.fol.language import Language
-from nsfr.fol.logic import Atom, Term, Const
-from nsfr.utils import load_module
+from nsfr.fol.logic import Atom, Const
+from nsfr.utils.common import load_module
 
 
 class ValuationFunction(nn.Module, ABC):

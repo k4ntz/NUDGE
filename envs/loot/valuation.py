@@ -1,7 +1,6 @@
 import torch
-
-from example.valuation._util import fuzzy_position
-from nsfr.utils import bool_to_probs
+from nsfr.utils.common import bool_to_probs
+from nsfr.utils.valuation import fuzzy_position
 
 
 def obj_type(z, a):
