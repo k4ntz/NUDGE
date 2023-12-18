@@ -1,9 +1,7 @@
 import torch
-import numpy as np
 
 
-class MLPAtari(torch.nn.Module):
-
+class MLP(torch.nn.Module):
     def __init__(self, has_softmax=False, out_size=3, as_dict=False, logic=False, device=None):
         super().__init__()
         self.logic = logic
@@ -12,9 +10,6 @@ class MLPAtari(torch.nn.Module):
         encoding_base_features = 4
         encoding_entity_features = 2
         encoding_max_entities = 11
-        # if logic:
-        #     self.num_in_features = 24
-        # else:
         self.num_in_features = (encoding_base_features + encoding_entity_features) * encoding_max_entities  # 44
 
         modules = [
@@ -29,9 +24,6 @@ class MLPAtari(torch.nn.Module):
         self.mlp = torch.nn.Sequential(*modules)
 
     def forward(self, state):
-        # if self.logic:
-        #     state = self.convert_states(state)
-        # import ipdb; ipdb.set_trace()
         features = state.float()
         y = self.mlp(features)
         return y

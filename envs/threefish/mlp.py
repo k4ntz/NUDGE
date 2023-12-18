@@ -1,8 +1,7 @@
 import torch
-import numpy as np
 
 
-class MLPThreefish(torch.nn.Module):
+class MLP(torch.nn.Module):
 
     def __init__(self, has_softmax=False, out_size=5, logic=False):
         super().__init__()
@@ -24,10 +23,6 @@ class MLPThreefish(torch.nn.Module):
         self.mlp = torch.nn.Sequential(*modules)
 
     def forward(self, state):
-        # if self.logic:
-        #     state = self.convert_states(state)
         features = state
         y = self.mlp(features)
         return y
-
-

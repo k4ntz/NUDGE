@@ -6,9 +6,6 @@ import pickle
 
 from nsfr.utils.common import load_module
 from torch.distributions import Categorical
-from .MLPController.mlpgetout import MLPGetout
-from .MLPController.mlpthreefish import MLPThreefish
-from .MLPController.mlploot import MLPLoot
 from envs.threefish.actions import simplify_action_bf
 from envs.loot.actions import simplify_action_loot
 from envs.getout.state_extraction import extract_neural_state as extract_neural_state_getout
@@ -23,18 +20,19 @@ class ActorCritic(nn.Module):
         self.device = device
         self.rng = random.Random() if rng is None else rng
         self.args = args
+
+        env_name = self.args.env
+        mlp_module_path = f"../envs/{env_name}/mlp.py"
+        module = load_module(mlp_module_path)
+        self.actor = module.MLP(has_softmax=True)
+        self.critic = module.MLP(has_softmax=False, out_size=1)
+
         if self.args.m == 'getout':
             self.num_action = 3
-            self.actor = MLPGetout(has_softmax=True)
-            self.critic = MLPGetout(has_softmax=False, out_size=1)
         elif self.args.m == 'threefish':
             self.num_action = 5
-            self.actor = MLPThreefish(has_softmax=True)
-            self.critic = MLPThreefish(has_softmax=False, out_size=1)
         elif self.args.m == "loot":
             self.num_action = 5
-            self.actor = MLPLoot(has_softmax=True)
-            self.critic = MLPLoot(has_softmax=False, out_size=1)
         self.uniform = Categorical(
             torch.tensor([1.0 / self.num_action for _ in range(3)], device=device))
 

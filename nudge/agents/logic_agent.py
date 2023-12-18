@@ -9,11 +9,6 @@ from torch.distributions import Categorical
 from nsfr.common import get_nsfr_model
 from nsfr.utils.common import load_module
 
-from .MLPController.mlpatari import MLPAtari
-from .MLPController.mlpgetout import MLPGetout
-from .MLPController.mlploot import MLPLoot
-from .MLPController.mlpthreefish import MLPThreefish
-
 
 class NSFR_ActorCritic(nn.Module):
     def __init__(self, args, device, rng=None):
@@ -23,14 +18,12 @@ class NSFR_ActorCritic(nn.Module):
         self.args = args
         self.actor = get_nsfr_model(self.args, device=device, train=True)
         self.prednames = self.get_prednames()
-        if self.args.m == 'threefish':
-            self.critic = MLPThreefish(out_size=1, logic=True)
-        elif self.args.m == 'getout':
-            self.critic = MLPGetout(out_size=1, logic=True)
-        elif self.args.m == 'loot':
-            self.critic = MLPLoot(out_size=1, logic=True)
-        elif self.args.m == 'atari':
-            self.critic = MLPAtari(out_size=1, logic=True)
+
+        env_name = self.args.env
+        mlp_module_path = f"../envs/{env_name}/mlp.py"
+        module = load_module(mlp_module_path)
+        self.critic = module.MLP(out_size=1, logic=True)
+
         self.num_actions = len(self.prednames)
         self.uniform = Categorical(
             torch.tensor([1.0 / self.num_actions for _ in range(self.num_actions)], device=device))
