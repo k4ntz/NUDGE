@@ -6,11 +6,6 @@ import pickle
 
 from nsfr.utils.common import load_module
 from torch.distributions import Categorical
-from envs.threefish.actions import simplify_action_bf
-from envs.loot.actions import simplify_action_loot
-from envs.getout.state_extraction import extract_neural_state as extract_neural_state_getout
-from envs.loot.state_extraction import extract_neural_state as extract_neural_state_loot
-from envs.threefish.state_extraction import extract_neural_state as extract_neural_state_threefish
 
 
 class ActorCritic(nn.Module):
@@ -183,6 +178,7 @@ class NeuralPPO:
 
     def get_weights(self):
         return self.policy.actor.get_params()
+
 
 class NeuralPlayer:
     def __init__(self, args, model=None):

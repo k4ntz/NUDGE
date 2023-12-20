@@ -3,6 +3,8 @@ from enum import Enum
 import numpy as np
 import torch
 
+import envs.getout.env
+
 
 def for_each_tensor(o, fn):
     if isinstance(o, torch.Tensor):
@@ -19,7 +21,7 @@ def for_each_tensor(o, fn):
 
 
 def collate(samples, to_cuda=True, double_to_float=True):
-    samples = torch.utils.data._utils.collate.default_collate(samples)
+    samples = envs.getout.env.collate.default_collate(samples)
     if double_to_float:
         samples = for_each_tensor(samples, lambda tensor: tensor.float() if tensor.dtype == torch.float64 else tensor)
     if to_cuda:

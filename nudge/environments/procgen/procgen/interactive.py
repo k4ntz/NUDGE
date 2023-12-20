@@ -14,7 +14,7 @@ class ProcgenInteractive(Interactive):
     def _update(self, dt, keys_clicked, keys_pressed):
         if "LEFT_SHIFT" in keys_pressed and "F1" in keys_clicked:
             print("save state")
-            self._saved_state = unwrap(self._env).get_state()
+            self._saved_state = unwrap(self._env).convert_state()
         elif "F1" in keys_clicked:
             print("load state")
             if self._saved_state is not None:

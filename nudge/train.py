@@ -1,31 +1,23 @@
 import argparse
-import copy
 import csv
 import os
-import pickle
 import sys
 import time
 
-import gymnasium as gym
 import numpy as np
-
-# import wandb
-# import environments.getout.env
 
 sys.path.insert(0, '../')
 
-from ocatari.core import OCAtari
 from rtpt import RTPT
 from tqdm import tqdm
 
 from agents.logic_agent import LogicPPO
 from agents.neural_agent import NeuralPPO
 from config import *
-from environments.procgen.procgen import ProcgenGym3Env
-# from make_graph import plot_weights
-from utils import env_step, initialize_game, make_deterministic
+from utils import make_deterministic
 from torch.utils.tensorboard import SummaryWriter
 import datetime
+from env import NudgeBaseEnv
 
 
 def main():
@@ -84,13 +76,7 @@ def main():
         max_training_timesteps = 800000
     #####################################################
 
-    if args.m == "getout":
-        env = gym.make(args.env, generator_args={"spawn_all_entities": False})
-    elif args.m == "threefish" or args.m == 'loot':
-        env = ProcgenGym3Env(num=1, env_name=args.env, render_mode=None)
-    elif args.m == "atari":
-        env = OCAtari(env_name=args.env.capitalize(), mode="revised", render_mode="rgb_array")
-        #env = OCAtari(env_name='Freeway', mode="revised")
+    env = NudgeBaseEnv.from_name(args.env, mode=args.alg)
 
     #####################################################
     # config = {
@@ -218,10 +204,6 @@ def main():
     if not os.path.exists(image_directory):
         os.makedirs(image_directory)
 
-    # if args.plot:
-    #     if args.alg == 'logic':
-    #         plot_weights(agent.get_weights(), image_directory)
-
     # printing and logging variables
     print_running_reward = 0
     print_running_episodes = 0
@@ -234,41 +216,33 @@ def main():
     folder_name += datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
     writer = SummaryWriter(f"runs/{folder_name}")
     rtpt.start()
+
     # training loop
     pbar = tqdm(total=max_training_timesteps-time_step)
     while time_step <= max_training_timesteps:
         #  initialize game
-        state = initialize_game(env, args)
+        state = env.reset()
+
+        # state = initialize_game(env, args)
         current_ep_reward = 0
 
         epsilon = epsilon_func(i_episode)
 
         for t in range(1, max_ep_len + 1):
-
-            # select action with policy
             action = agent.select_action(state, epsilon=epsilon)
-            reward, state, done = env_step(action, env, args)
-            # print(action)
-            if args.m == "atari":
-                state = env.objects
-            # saving reward and is_terminals
+
+            state, reward, done = env.step(action)
+
             agent.buffer.rewards.append(reward)
             agent.buffer.is_terminals.append(done)
-            # if reward:
-            #     print("REWARD! :", reward)
 
             time_step += 1
             pbar.update(1)
             rtpt.step()
             current_ep_reward += reward
 
-            # update PPO agent
             if time_step % update_timestep == 0:
                 agent.update()
-            # if time_step % 10 == 0:
-            #     import matplotlib.pyplot as plt
-            #     plt.imshow(env._get_obs())
-            #     plt.show()
 
             # printing average reward
             if time_step % print_freq == 0:

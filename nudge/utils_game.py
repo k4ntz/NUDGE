@@ -198,7 +198,7 @@ def render_getout(agent, args):
         if args.log:
             if args.alg == 'logic':
                 probs = agent.get_probs()
-                logic_state = agent.get_state(getout)
+                logic_state = agent.convert_state(getout)
                 data = [(num_epi, step, reward, average_reward, logic_state, probs)]
                 writer.writerows(data)
             elif args.alg == 'ppo' or args.alg == 'random':

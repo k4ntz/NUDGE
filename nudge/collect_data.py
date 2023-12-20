@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from environments.getout.getout.imageviewer import ImageViewer
 from environments.getout.getout.getout.getout import Getout
 from environments.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
-from envs.getout.state_extraction import sample_to_model_input, extract_state, collate
+from envs.getout.env import collate, extract_state, sample_to_model_input
 from agents.neural_agent import ActorCritic
 from agents.utils_loot import extract_neural_state_loot, extract_logic_state_loot
 from envs.loot.actions import simplify_action_loot

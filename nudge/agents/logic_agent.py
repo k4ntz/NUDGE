@@ -84,10 +84,10 @@ class LogicPPO:
 
         # Different games use different action system, need to map it to the correct action.
         # action of logic game means a String, need to map string to the correct action,
-        env_name = self.args.env
-        action_mapping_module_path = f"../envs/{env_name}/actions.py"
-        module = load_module(action_mapping_module_path)
-        self.map_action = module.map_action
+        # env_name = self.args.env
+        # action_mapping_module_path = f"../envs/{env_name}/actions.py"
+        # module = load_module(action_mapping_module_path)
+        # self.map_action = module.map_action
 
     def extract_states(self, raw_state):
         """Extracts the logic and the neural state representation of the given raw state.
@@ -104,7 +104,9 @@ class LogicPPO:
         return logic_state, neural_state
 
     def select_action(self, state, epsilon=0.0):
-        logic_state, neural_state = self.extract_states(state)
+        logic_state, neural_state = state
+        logic_state = torch.tensor(logic_state, dtype=torch.float32, device=self.device).unsqueeze(0)
+        neural_state = torch.tensor(neural_state, dtype=torch.float32, device=self.device).unsqueeze(0)
 
         # select random action with epsilon probability and policy probiability with 1-epsilon
         with torch.no_grad():
@@ -119,9 +121,8 @@ class LogicPPO:
         action_logprob = torch.squeeze(action_logprob)
         self.buffer.logprobs.append(action_logprob)
 
-        action = self.map_action(action.item(), self.args.alg, self.prednames)
-
-        return action
+        predicate = self.prednames[action.item()]
+        return predicate
 
     def update(self):
         # Monte Carlo estimate of returns
