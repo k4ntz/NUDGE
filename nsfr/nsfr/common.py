@@ -11,11 +11,11 @@ def get_nsfr_model(args, device, train=False):
 
     current_path = os.path.dirname(__file__)
     lark_path = os.path.join(current_path, 'lark/exp.lark')
-    lang_base_path = os.path.join(current_path, 'data/lang/')
+    lang_base_path = 'in/logic/'
 
     lang, clauses, bk, atoms = get_lang(lark_path, lang_base_path, args.m, args.rules)
 
-    val_fn_path = f"../envs/{env_name}/valuation.py"
+    val_fn_path = f"envs/{env_name}/valuation.py"
     val_module = ValuationModule(val_fn_path, lang, device)
 
     FC = FactsConverter(lang=lang, valuation_module=val_module, device=device)

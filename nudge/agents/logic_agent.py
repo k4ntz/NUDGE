@@ -20,7 +20,7 @@ class NSFR_ActorCritic(nn.Module):
         self.prednames = self.get_prednames()
 
         env_name = self.args.env
-        mlp_module_path = f"../envs/{env_name}/mlp.py"
+        mlp_module_path = f"envs/{env_name}/mlp.py"
         module = load_module(mlp_module_path)
         self.critic = module.MLP(out_size=1, logic=True)
 

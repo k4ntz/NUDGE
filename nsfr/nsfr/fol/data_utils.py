@@ -23,7 +23,7 @@ class DataUtils(object):
         if not dataset:
             print("Please provide -r option")
             exit(1)
-        self.base_path = lang_base_path + dataset_type + '/' + dataset + '/'
+        self.base_path = lang_base_path + dataset + '/'
         with open(lark_path, encoding="utf-8") as grammar:
             self.lp_atom = Lark(grammar.read(), start="atom")
         with open(lark_path, encoding="utf-8") as grammar:
