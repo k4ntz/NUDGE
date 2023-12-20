@@ -187,41 +187,9 @@ class NeuralPlayer:
         self.device = torch.device('cuda:0')
 
     def act(self, state):
-        if self.args.m == 'getout':
-            action = self.getout_actor(state)
-        elif self.args.m == 'threefish':
-            action = self.threefish_actor(state)
-        elif self.args.m == 'loot':
-            action = self.loot_actor(state)
-        return action
-
-    def getout_actor(self, getout):
-        state = extract_neural_state_getout(getout, self.args)
-        # model_input = sample_to_model_input((extract_state(getout), []))
-        # model_input = collate([model_input])
-        # state = model_input['state']
-        # state = torch.cat([state['base'], state['entities']], dim=1)
-        prediction = self.model(state)
-        # action = coin_jump_actions_from_unified(torch.argmax(prediction).cpu().item() + 1)
+        logic_state, neural_state = state
+        prediction = self.model(neural_state)
         action = torch.argmax(prediction).cpu().item() + 1
-        return action
-
-    def threefish_actor(self, state):
-        state = extract_neural_state_threefish(state, self.args)
-        # state = state.reshape(-1)
-        # state = state.tolist()
-        predictions = self.model(state)
-        action = torch.argmax(predictions)
-        action = simplify_action_bf(action)
-        return action
-
-    def loot_actor(self, state):
-        state = extract_neural_state_loot(state, self.args)
-        # state = state.reshape(-1)
-        # state = state.tolist()
-        predictions = self.model(state)
-        action = torch.argmax(predictions)
-        action = simplify_action_loot(action)
         return action
 
 

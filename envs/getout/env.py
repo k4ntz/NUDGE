@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Sequence
 
-from agents.utils_getout import fixed_size_entity_representation, replace_bools
 from nudge.env import NudgeBaseEnv
 import numpy as np
 import gymnasium as gym
@@ -163,3 +162,65 @@ def sample_to_model_input(sample, no_dict=False, include_score=False):
         "state": tr_state,
         "action": action
     }
+
+
+ENTITY_ENCODING_LENGTH = 9
+COIN0_IDX = 4 * ENTITY_ENCODING_LENGTH
+COIN1_IDX = 5 * ENTITY_ENCODING_LENGTH
+IDX_X = 1
+
+
+def fixed_size_entity_representation(state, swap_coins=None):
+    """
+    Compresses the list of entities into an fixed size array (MAX_ENTITIES(6)*ENTITY_ENCODING(9))
+    Entity order: player, flag, powerup, enemy, coin0, coin1.
+    Entity encoding: [x,y, vx,vy, E0..E3]
+    :param state:
+    :return: int[54] representation of the state
+    """
+
+    entities = state['entities']
+    MAX_ENTITIES = 6  # maximum number of entities in the level (1*player, 1*flag, 1*powerup, 1*enemy, 2*coin)
+    ENTITY_ENCODING = 9  # number of parameters by which each entity is encoded
+    tr_entities = [0] * ENTITY_ENCODING * MAX_ENTITIES
+
+    # we assume that player,flag,powerup and enemy occur at max once and coins at max twice
+    coin_count = 0
+    # IDs: PLAYER = 1
+    #      FLAG = 2
+    #      COIN = 3
+    #      POWERUP = 4
+    #      GROUND_ENEMY = 5
+    # Position encoding: player, flag, powerup, enemy, coin0, coin1
+    for entity in entities:
+        id = entity[0]
+        if id == 3:
+            id = 5 + coin_count
+            coin_count += 1
+        elif id > 3:
+            id -= 1
+        id -= 1
+
+        start_pos = id * ENTITY_ENCODING
+        tr_entities[start_pos:start_pos + ENTITY_ENCODING] = entity
+
+    if swap_coins is None:
+        swap_coins = coin_count == 2 and tr_entities[COIN1_IDX + IDX_X] < tr_entities[COIN0_IDX + IDX_X]
+
+    if swap_coins:
+        # swap coins to make coin0 to be left most
+        temp_coin = tr_entities[COIN0_IDX:COIN0_IDX + ENTITY_ENCODING_LENGTH]
+        tr_entities[COIN0_IDX:COIN0_IDX + ENTITY_ENCODING_LENGTH] = tr_entities[
+                                                                    COIN1_IDX:COIN1_IDX + ENTITY_ENCODING_LENGTH]
+        tr_entities[COIN1_IDX:COIN1_IDX + ENTITY_ENCODING_LENGTH] = temp_coin
+
+    return tr_entities, swap_coins
+
+
+def replace_bools(tr_entities, swap_coins):
+    # for i, x in enumerate(a):
+    #     if isinstance(x, bool):
+    #         a[i] = int(x)
+    swap_coins = int(swap_coins)
+
+    return tr_entities, swap_coins

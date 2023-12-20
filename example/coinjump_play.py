@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import sys
 
+# TODO
 sys.path.insert(0, '../')
 from nudge.utils import make_deterministic
 from nudge.environments.getout.getout.imageviewer import ImageViewer

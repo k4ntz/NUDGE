@@ -3,12 +3,11 @@ import json
 import os
 
 import torch
-from torch.utils.tensorboard import SummaryWriter
 
 from nsfr.clause_generator import ClauseGenerator
-from nsfr.logic_utils import get_lang
+from nsfr.utils.logic import get_lang
 from nsfr.mode_declaration import get_mode_declarations
-from nsfr.utils_beam import get_nsfr_model
+from nsfr.utils.beam import get_nsfr_model
 
 device = torch.device('cuda:0')
 

@@ -1,23 +1,22 @@
-import csv
-import random
-import time
-import gym3
-import numpy as np
 import ast
-import pandas as pd
-from tqdm import tqdm
-import sys
+import csv
 import io
 import os
-import cv2
-from environments.procgen.procgen import ProcgenGym3Env
-from environments.getout.getout.imageviewer import ImageViewer
-from environments.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
-from environments.getout.getout.getout.getout import Getout
-from environments.getout.getout.getout.actions import GetoutActions
-from ocatari.core import OCAtari
-from PIL import Image, ImageFont, ImageDraw
+import sys
+import time
 
+import cv2
+import gym3
+import numpy as np
+import pandas as pd
+from PIL import Image, ImageFont, ImageDraw
+from ocatari.core import OCAtari
+
+from envs.getout.getout.getout.actions import GetoutActions
+from envs.getout.getout.getout.getout import Getout
+from envs.getout.getout.getout.paramLevelGenerator import ParameterizedLevelGenerator
+from envs.getout.getout.imageviewer import ImageViewer
+from envs.loot.procgen.procgen import ProcgenGym3Env
 
 font_path = os.path.join(cv2.__path__[0], 'qt', 'fonts', 'DejaVuSans.ttf')
 font = ImageFont.truetype(font_path, size=40)
@@ -414,8 +413,6 @@ def render_ecoinrun(agent, args):
 
 def render_atari(agent, args):
     # gamename = 
-    from ocatari.vision.utils import mark_bb, make_darker
-    import matplotlib.pyplot as plt
     rdr_mode = "human" if args.render else "rgb_array"
     env = OCAtari(env_name=args.env.capitalize(), render_mode=rdr_mode, mode="revised")
     obs = env.reset()

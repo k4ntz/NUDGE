@@ -1,12 +1,10 @@
 import argparse
-import torch
 import os
 
-from utils import make_deterministic
-from utils_game import render_getout, render_threefish, render_loot, render_ecoinrun, render_atari
-from agents.neural_agent import ActorCritic, NeuralPlayer
+import torch
+
 from agents.logic_agent import NSFR_ActorCritic, LogicPlayer
-from agents.random_agent import RandomPlayer
+from utils import make_deterministic
 
 
 def load_model(model_path, args, device, set_eval=True):
