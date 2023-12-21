@@ -5,6 +5,7 @@ import torch
 
 
 class NudgeBaseEnv(ABC):
+    name: str
     pred2action: Dict[str, int]  # predicate name to action index
 
     def __init__(self, mode: str):
@@ -40,8 +41,11 @@ class NudgeBaseEnv(ABC):
             raise ValueError(f"Invalid predicate '{model_action}' provided. "
                              f"Must contain any of {pred_names}.")
 
+    def n_actions(self) -> int:
+        return len(list(set(self.pred2action.items())))
+
     @staticmethod
     def from_name(name: str, **kwargs):
-        env_path = f"envs/{name}/env.py"
+        env_path = f"in/envs/{name}/env.py"
         env_module = load_module(env_path)
         return env_module.NudgeEnv(**kwargs)

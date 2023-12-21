@@ -3,33 +3,29 @@ import torch
 import torch.nn as nn
 import random
 import pickle
+from pathlib import Path
 
 from nsfr.utils.common import load_module
 from torch.distributions import Categorical
+from nudge.env import NudgeBaseEnv
 
 
 class ActorCritic(nn.Module):
-    def __init__(self, args, rng=None, device=None):
+    def __init__(self, env: NudgeBaseEnv, rng=None, device=None):
         super(ActorCritic, self).__init__()
 
         self.device = device
         self.rng = random.Random() if rng is None else rng
-        self.args = args
+        self.env = env
 
-        env_name = self.args.env
-        mlp_module_path = f"../envs/{env_name}/mlp.py"
+        mlp_module_path = f"../envs/{self.env.name}/mlp.py"
         module = load_module(mlp_module_path)
         self.actor = module.MLP(has_softmax=True)
         self.critic = module.MLP(has_softmax=False, out_size=1)
 
-        if self.args.m == 'getout':
-            self.num_action = 3
-        elif self.args.m == 'threefish':
-            self.num_action = 5
-        elif self.args.m == "loot":
-            self.num_action = 5
+        self.n_actions = self.env.n_actions()
         self.uniform = Categorical(
-            torch.tensor([1.0 / self.num_action for _ in range(3)], device=device))
+            torch.tensor([1.0 / self.n_actions for _ in range(3)], device=device))
 
     def forward(self):
         raise NotImplementedError
@@ -61,38 +57,26 @@ class ActorCritic(nn.Module):
 
 
 class NeuralPPO:
-    def __init__(self, lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device=None):
+    def __init__(self, env: NudgeBaseEnv, lr_actor, lr_critic, optimizer, gamma,
+                 epochs, eps_clip, device=None):
 
         self.device = device
         self.gamma = gamma
         self.eps_clip = eps_clip
-        self.K_epochs = K_epochs
-        self.args = args
+        self.epochs = epochs
         self.buffer = RolloutBuffer()
-        self.policy = ActorCritic(self.args, device=device)
+        self.policy = ActorCritic(env, device=device)
         self.optimizer = optimizer([
             {'params': self.policy.actor.parameters(), 'lr': lr_actor},
             {'params': self.policy.critic.parameters(), 'lr': lr_critic}
         ])
 
-        self.policy_old = ActorCritic(self.args, device=device)
+        self.policy_old = ActorCritic(env, device=device)
         self.policy_old.load_state_dict(self.policy.state_dict())
 
         self.MseLoss = nn.MSELoss()
 
-        env_name = self.args.env
-
-        state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
-        module = load_module(state_extraction_module_path)
-        self.extract_neural_state = module.extract_neural_state
-
-        action_mapping_module_path = f"../envs/{env_name}/actions.py"
-        module = load_module(action_mapping_module_path)
-        self.map_action = module.map_action
-
     def select_action(self, state, epsilon=0.0):
-        state = self.extract_neural_state(state, variant=self.args.env)  # TODO: rename args.env
-
         # select random action with epsilon probability and policy probability with 1-epsilon
         with torch.no_grad():
             # state = torch.FloatTensor(state).to(device)
@@ -103,8 +87,6 @@ class NeuralPPO:
         self.buffer.actions.append(action)
         action_logprob = torch.squeeze(action_logprob)
         self.buffer.logprobs.append(action_logprob)
-
-        action = self.map_action(action.item(), self.args)
 
         return action
 
@@ -128,7 +110,7 @@ class NeuralPPO:
         old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(self.device)
 
         # Optimize policy for K epochs
-        for _ in range(self.K_epochs):
+        for _ in range(self.epochs):
             # Evaluating old actions and values
             logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
 
@@ -159,19 +141,19 @@ class NeuralPPO:
         # clear buffer
         self.buffer.clear()
 
-    def save(self, checkpoint_path, directory, step_list, reward_list):
+    def save(self, checkpoint_path, directory: Path, step_list, reward_list):
         torch.save(self.policy_old.state_dict(), checkpoint_path)
-        with open(directory + '/' + "data.pkl", "wb") as f:
+        with open(directory / "data.pkl", "wb") as f:
             pickle.dump(step_list, f)
             pickle.dump(reward_list, f)
 
-    def load(self, directory):
+    def load(self, directory: Path):
         # only for recover form crash
         model_name = input('Enter file name: ')
         model_file = os.path.join(directory, model_name)
         self.policy_old.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
-        with open(directory + '/' + "data.pkl", "rb") as f:
+        with open(directory / "data.pkl", "rb") as f:
             step_list = pickle.load(f)
             reward_list = pickle.load(f)
         return step_list, reward_list

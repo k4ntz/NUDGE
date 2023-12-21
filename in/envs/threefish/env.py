@@ -1,13 +1,13 @@
 from typing import Sequence
 
 from nudge.env import NudgeBaseEnv
-from ocatari.core import OCAtari
 import numpy as np
-from environments.procgen.procgen import ProcgenGym3Env
+from ..loot.procgen.procgen import ProcgenGym3Env
 import torch
 
 
 class NudgeEnv(NudgeBaseEnv):
+    name = "threefish"
     pred2action = {
         'left': 1,
         'down': 3,

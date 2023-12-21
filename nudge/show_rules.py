@@ -3,13 +3,13 @@ import os
 
 import torch
 
-from agents.logic_agent import NSFR_ActorCritic, LogicPlayer
+from agents.logic_agent import NsfrActorCritic, LogicPlayer
 from utils import make_deterministic
 
 
 def load_model(model_path, args, device, set_eval=True):
     with open(model_path, "rb") as f:
-        model = NSFR_ActorCritic(args, device=device).to(device)
+        model = NsfrActorCritic(args, device=device).to(device)
         model.load_state_dict(state_dict=torch.load(f))
 
     model = model.actor

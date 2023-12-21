@@ -22,10 +22,10 @@ class ModeDeclaration(object):
     All the examples above have simple modetypes.
     A structured ModeType is of the form f(..) where f is a function symbol,
     each argument of which is either a simple or structured ModeType.
-    Here is an example containing a structured ModeType:
+    Here is an scripts containing a structured ModeType:
 
 
-    To make this more clear, here is an example for the mode declarations for
+    To make this more clear, here is an scripts for the mode declarations for
     the grandfather task from
      above::- modeh(1, grandfather(+human, +human)).:-
       modeb(*, parent(-human, +human)).:-

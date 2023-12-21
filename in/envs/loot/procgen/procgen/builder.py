@@ -42,10 +42,10 @@ def run(cmd):
 
 def check(proc, verbose):
     if proc.returncode != 0:
-        print(f"RUN FAILED {proc.args}:\n{proc.stdout}")
+        print(f"RUN FAILED {proc.env}:\n{proc.stdout}")
         raise RunFailure("failed to build procgen from source")
     if verbose:
-        print(f"RUN {proc.args}:\n{proc.stdout}")
+        print(f"RUN {proc.env}:\n{proc.stdout}")
 
 
 def _attempt_configure(build_type, package):

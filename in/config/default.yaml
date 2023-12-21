@@ -1,0 +1,4 @@
+algorithm: logic
+environment: freeway
+rules: default
+update_steps: 100

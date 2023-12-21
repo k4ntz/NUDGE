@@ -47,7 +47,7 @@ def run():
     env = ProcgenGym3Env(num=1, env_name=args.env, render_mode="rgb_array")
     env = gym3.ViewerWrapper(env, info_key="rgb")
 
-    nsfr = get_nsfr_model(args, device=device)
+    nsfr = get_nsfr_model(args.env, device=device)
 
     NB_DONE = 0
     TO_SUCCEED = 1

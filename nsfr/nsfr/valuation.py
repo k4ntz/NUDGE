@@ -1,4 +1,4 @@
-from typing import Sequence, Dict, Any
+from typing import Sequence, Dict, Any, Union
 from abc import ABC
 import inspect
 import re
@@ -36,12 +36,13 @@ class ValuationModule(nn.Module, ABC):
     """
 
     lang: Language
-    device: torch.device
+    device: Union[torch.device, str]
     val_fns: Dict[str, ValuationFunction]  # predicate names to corresponding valuation fn
     attrs: Dict[Any, torch.Tensor]  # attribute terms to corresponding one-hot encoding
     dataset: str
 
-    def __init__(self, val_fn_path: str, lang: Language, device: torch.device, pretrained: bool = True):
+    def __init__(self, val_fn_path: str, lang: Language, device: Union[torch.device, str],
+                 pretrained: bool = True):
         super().__init__()
 
         # Parse all value functions

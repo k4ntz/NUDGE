@@ -1,6 +1,7 @@
 import os
 import pickle
 import random
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -8,19 +9,19 @@ from torch.distributions import Categorical
 
 from nsfr.common import get_nsfr_model
 from nsfr.utils.common import load_module
+from nudge.env import NudgeBaseEnv
 
 
-class NSFR_ActorCritic(nn.Module):
-    def __init__(self, args, device, rng=None):
-        super(NSFR_ActorCritic, self).__init__()
+class NsfrActorCritic(nn.Module):
+    def __init__(self, env: NudgeBaseEnv, rules: str, device, rng=None):
+        super(NsfrActorCritic, self).__init__()
         self.device =device
         self.rng = random.Random() if rng is None else rng
-        self.args = args
-        self.actor = get_nsfr_model(self.args, device=device, train=True)
+        self.env = env
+        self.actor = get_nsfr_model(env.name, rules, device=device, train=True)
         self.prednames = self.get_prednames()
 
-        env_name = self.args.env
-        mlp_module_path = f"envs/{env_name}/mlp.py"
+        mlp_module_path = f"in/envs/{self.env.name}/mlp.py"
         module = load_module(mlp_module_path)
         self.critic = module.MLP(out_size=1, logic=True)
 
@@ -64,44 +65,23 @@ class NSFR_ActorCritic(nn.Module):
 
 
 class LogicPPO:
-    def __init__(self, lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device=None):
+    def __init__(self, env: NudgeBaseEnv, rules: str, lr_actor, lr_critic, optimizer,
+                 gamma, epochs, eps_clip, device=None):
         self.device = device
         self.gamma = gamma
         self.eps_clip = eps_clip
-        self.K_epochs = K_epochs
+        self.epochs = epochs
         self.buffer = RolloutBuffer()
-        self.args = args
-        self.policy = NSFR_ActorCritic(self.args, device=device).to(device)
+        self.policy = NsfrActorCritic(env, rules, device=device).to(device)
         self.optimizer = optimizer([
             {'params': self.policy.actor.get_params(), 'lr': lr_actor},
             {'params': self.policy.critic.parameters(), 'lr': lr_critic}
         ])
 
-        self.policy_old = NSFR_ActorCritic(self.args, device=device).to(device)
+        self.policy_old = NsfrActorCritic(env, rules, device=device).to(device)
         self.policy_old.load_state_dict(self.policy.state_dict())
         self.MseLoss = nn.MSELoss()
         self.prednames = self.get_prednames()
-
-        # Different games use different action system, need to map it to the correct action.
-        # action of logic game means a String, need to map string to the correct action,
-        # env_name = self.args.env
-        # action_mapping_module_path = f"../envs/{env_name}/actions.py"
-        # module = load_module(action_mapping_module_path)
-        # self.map_action = module.map_action
-
-    def extract_states(self, raw_state):
-        """Extracts the logic and the neural state representation of the given raw state.
-        The extraction depends on the environment."""
-        env_name = self.args.env
-        state_extraction_module_path = f"../envs/{env_name}/state_extraction.py"
-        module = load_module(state_extraction_module_path)
-
-        logic_state = module.extract_logic_state(raw_state)  # TODO: enable custom args
-        logic_state = torch.tensor(logic_state, dtype=torch.float32, device=self.device).unsqueeze(0)
-        neural_state = module.extract_neural_state(raw_state)  # TODO: enable custom args
-        neural_state = torch.tensor(neural_state, dtype=torch.float32, device=self.device).unsqueeze(0)
-
-        return logic_state, neural_state
 
     def select_action(self, state, epsilon=0.0):
         logic_state, neural_state = state
@@ -146,7 +126,7 @@ class LogicPPO:
         old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(self.device)
 
         # Optimize policy for K epochs
-        for _ in range(self.K_epochs):
+        for _ in range(self.epochs):
             # Evaluating old actions and values
             logprobs, state_values, dist_entropy = self.policy.evaluate(old_neural_states, old_logic_states,
                                                                         old_actions)
@@ -178,20 +158,20 @@ class LogicPPO:
         # clear buffer
         self.buffer.clear()
 
-    def save(self, checkpoint_path, directory, step_list, reward_list, weight_list):
+    def save(self, checkpoint_path, directory: Path, step_list, reward_list, weight_list):
         torch.save(self.policy_old.state_dict(), checkpoint_path)
         with open(directory / "data.pkl", "wb") as f:
             pickle.dump(step_list, f)
             pickle.dump(reward_list, f)
             pickle.dump(weight_list, f)
 
-    def load(self, directory):
+    def load(self, directory: Path):
         # only for recover form crash
         model_name = input('Enter file name: ')
         model_file = os.path.join(directory, model_name)
         self.policy_old.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
-        with open(directory + '/' + "data.pkl", "rb") as f:
+        with open(directory / "data.pkl", "rb") as f:
             step_list = pickle.load(f)
             reward_list = pickle.load(f)
             weight_list = pickle.load(f)

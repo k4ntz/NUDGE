@@ -1,4 +1,4 @@
-# a logic player example of getout
+# a logic player scripts of getout
 import time
 import argparse
 import numpy as np
@@ -77,7 +77,7 @@ def run():
     last_frame_time = 0
     last_explaining = None
 
-    nsfr = get_nsfr_model(args, device=device, train=False)
+    nsfr = get_nsfr_model(args.env, device=device, train=False)
     while True:
         # control framerate
         current_frame_time = time.time()

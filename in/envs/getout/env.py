@@ -9,6 +9,7 @@ import torch
 
 
 class NudgeEnv(NudgeBaseEnv):
+    name = "getout"
     pred2action = {
         'stay': 0,
         'idle': 0,

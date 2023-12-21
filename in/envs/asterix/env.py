@@ -6,6 +6,7 @@ import numpy as np
 
 
 class NudgeEnv(NudgeBaseEnv):
+    name = "asterix"
     pred2action = {
         'noop': 0,
         'up': 1,

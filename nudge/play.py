@@ -5,7 +5,7 @@ import os
 from utils import make_deterministic
 from utils_game import render_getout, render_threefish, render_loot, render_ecoinrun, render_atari
 from agents.neural_agent import ActorCritic, NeuralPlayer
-from agents.logic_agent import NSFR_ActorCritic, LogicPlayer
+from agents.logic_agent import NsfrActorCritic, LogicPlayer
 from agents.random_agent import RandomPlayer
 
 device = torch.device('cuda:0')
@@ -17,7 +17,7 @@ def load_model(model_path, args, set_eval=True):
         if args.alg == 'ppo':
             model = ActorCritic(args).to(device)
         elif args.alg == 'logic':
-            model = NSFR_ActorCritic(args, device=device).to(device)
+            model = NsfrActorCritic(args, device=device).to(device)
         model.load_state_dict(state_dict=torch.load(f))
         if args.alg == 'logic':
             model.actor.print_program()

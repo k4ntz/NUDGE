@@ -1,9 +1,13 @@
-import argparse
 import csv
 import os
 import sys
 import time
 from pathlib import Path
+from typing import Callable
+import math
+
+from torch.optim import Optimizer, Adam
+import yaml
 
 import numpy as np
 
@@ -12,157 +16,112 @@ from tqdm import tqdm
 
 from agents.logic_agent import LogicPPO
 from agents.neural_agent import NeuralPPO
-from config import *
 from utils import make_deterministic
 from torch.utils.tensorboard import SummaryWriter
 import datetime
 from env import NudgeBaseEnv
 
-
 OUT_PATH = Path("out/")
+IN_PATH = Path("in/")
 
 
-def main():
-    device = "cpu"
+def epsilon_fn(episode: int):
+    return max(math.exp(-episode / 500), 0.02)
 
-    ################### args definition ###################
-    parser = argparse.ArgumentParser()
 
-    parser.add_argument("-s", "--seed", help="Seed for pytorch + env",
-                        required=False, action="store", dest="seed", type=int, default=0)
-    parser.add_argument("-alg", "--algorithm", help="algorithm that to use",
-                        action="store", dest="alg", required=True,
-                        choices=['ppo', 'logic'])
-    parser.add_argument("-m", "--mode", help="the game mode you want to play with",
-                        required=True, action="store", dest="m",
-                        choices=['getout', 'threefish', 'loot', 'atari'])
-    parser.add_argument("-env", "--environment", help="environment of game to use",
-                        required=True, action="store", dest="env",
-                        choices=['getout', 'threefish', 'loot', 'freeway', 'kangaroo', 'asterix', 'loothard'])
-    parser.add_argument("-r", "--rules", dest="rules", default=None, required=False)
-    parser.add_argument('-p', '--plot', help="plot the image of weights", type=bool, default=False, dest='plot')
-    parser.add_argument('-re', '--recovery', help='recover from crash', default=False, type=bool, dest='recover')
-    # arg = ['-alg', 'logic', '-m', 'threefish', '-env', 'threefish', '-p', 'True', '-r', 'threefish_human_assisted']
-    args = parser.parse_args()
+def main(algorithm: str,
+         environment: str,
+         env_kwargs: dict = None,
+         rules: str = "default",
+         seed: int = 0,
+         device: str = "cpu",
+         total_steps: int = 800000,
+         max_ep_len: int = 500,
+         update_steps: int = None,
+         epochs: int = 20,
+         eps_clip: float = 0.2,
+         gamma: float = 0.99,
+         optimizer: Optimizer = Adam,
+         lr_actor: float = 0.001,
+         lr_critic: float = 0.0003,
+         epsilon_fn: Callable = epsilon_fn,
+         recover: bool = False,
+         plot: bool = False,
+         save_steps: int = 250000,
+         print_steps: int = 2000,
+         log_steps: int = 2000,
+         ):
+    """
 
-    #####################################################
-    # load environment
-    print("training environment name : " + args.env.capitalize())
-    make_deterministic(args.seed)
+    Args:
+        algorithm: Either 'ppo' for Proximal Policy Optimization or 'logic'
+            for First-Order Logic model
+        environment: The name of the environment to use (prepared inside in/envs)
+        env_kwargs: Optional settings for the environment
+        rules: The name of the logic rule set to use
+        seed: Random seed for reproduction
+        device: For example 'cpu' or 'cuda:0'
+        total_steps: Total number of time steps to train the agent
+        max_ep_len: Maximum number of time steps per episode
+        update_steps: Number of time steps between agent updates. Caution: if too
+            high, causes OutOfMemory errors when running with CUDA.
+        epochs: Number of epochs (k) per agent update
+        eps_clip: Clipping factor epsilon for PPO
+        gamma: Discount factor
+        optimizer: The optimizer to use for agent updates
+        lr_actor: Learning rate of the actor (policy)
+        lr_critic: Learning rate of the critic (value fn)
+        epsilon_fn: Function mapping episode number to epsilon (greedy) for
+            exploration
+        recover: If true, tries to reload an existing run that was interrupted
+            before completion.
+        plot: If true, plots the weights
+        save_steps: Number of steps between each checkpoint save
+        print_steps: Number of steps between each statistics summary print
+        log_steps: Number of steps between each statistics logging
+    """
 
-    #####################################################
-    # config setting
-    if args.alg == 'ppo':
-        update_timestep = max_ep_len * 4
-    elif args.alg == 'logic' and args.m == 'atari':
-        # a large num causes out of memory
-        update_timestep = 100
-        # print("PUT BACK 20 ! ")
-        # update_timestep = 7
-        # max_ep_len = 100
-    else:
-        update_timestep = max_ep_len * 2
+    make_deterministic(seed)
 
-    if args.m == 'loot' and args.alg == 'ppo':
-        max_training_timesteps = 5000000
-    else:
-        max_training_timesteps = 800000
-    #####################################################
+    assert algorithm in ['ppo', 'logic']
 
-    env = NudgeBaseEnv.from_name(args.env, mode=args.alg)
+    if update_steps is None:
+        if algorithm == 'ppo':
+            update_steps = max_ep_len * 4
+        else:
+            update_steps = 100
 
-    #####################################################
-    # config = {
-    #     "seed": args.seed,
-    #     "learning_rate_actor": lr_actor,
-    #     "learning_rate_critic": lr_critic,
-    #     "epochs": K_epochs,
-    #     "gamma": gamma,
-    #     "eps_clip": eps_clip,
-    #     "max_steps": max_training_timesteps,
-    #     "eps start": 1.0,
-    #     "eps end": 0.02,
-    #     "max_ep_len": max_ep_len,
-    #     "update_freq": max_ep_len * 2,
-    #     "save_freq": max_ep_len * 50,
-    # }
-    # if args.rules is not None:
-    #     runs_name = str(args.rules) + '_seed_' + str(args.seed)
-    # else:
-    #     runs_name = str(args.m) + '_' + args.alg + '_seed_' + str(args.seed)
+    env = NudgeBaseEnv.from_name(environment, mode=algorithm)
 
-    # wandb.init(project="GETOUT-BS", entity="nyrus", config=config, name=runs_name)
-    # wandb.init(project="LOOT", entity="nyrus", config=config, name=runs_name)
-    # wandb.init(project="THREEFISH", entity="nyrus", config=config, name=runs_name)
-
-    checkpoint_dir = OUT_PATH / "checkpoints" / args.env / args.alg / str(args.seed)
-    image_dir = OUT_PATH / "images" / args.env / args.alg / str(args.seed)
+    now_str = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+    experiment_dir = OUT_PATH / "runs" / environment / algorithm / now_str
+    checkpoint_dir = experiment_dir / "checkpoints"
+    image_dir = experiment_dir / "images"
+    log_dir = experiment_dir
     os.makedirs(checkpoint_dir, exist_ok=True)
     os.makedirs(image_dir, exist_ok=True)
 
-    checkpoint_path = checkpoint_dir / "{}_{}.pth".format(args.env, 0)
+    # TODO: print summary and save config
 
-    print("save checkpoint path :", checkpoint_path)
-
-    #####################################################
-
-    ############# print all hyperparameters #############
-
-    print("--------------------------------------------------------------------------------------------")
-
-    print("max training timesteps : ", max_training_timesteps)
-    print("max timesteps per episode : ", max_ep_len)
-
-    print("model saving frequency : " + str(save_model_freq) + " timesteps")
-    print("log frequency : " + str(log_freq) + " timesteps")
-    print("printing average reward over episodes in last : " + str(print_freq) + " timesteps")
-
-    print("--------------------------------------------------------------------------------------------")
-
-    # print("state space dimension : ", state_dim)
-    # print("action space dimension : ", action_dim)
-
-    print("--------------------------------------------------------------------------------------------")
-
-    print("Initializing a discrete action space policy")
-
-    print("--------------------------------------------------------------------------------------------")
-
-    print("PPO update frequency : " + str(update_timestep) + " timesteps")
-    print("PPO K epochs : ", K_epochs)
-    print("PPO epsilon clip : ", eps_clip)
-    print("discount factor (gamma) : ", gamma)
-
-    print("--------------------------------------------------------------------------------------------")
-
-    print("optimizer learning rate actor : ", lr_actor)
-    print("optimizer learning rate critic : ", lr_critic)
-
-    #####################################################
-
-    print("============================================================================================")
-
-    ################# training procedure ################
-    #
     # initialize agent
-    if args.alg == "ppo":
-        agent = NeuralPPO(lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device)
-    elif args.alg == "logic":
-        agent = LogicPPO(lr_actor, lr_critic, optimizer, gamma, K_epochs, eps_clip, args, device)
+    if algorithm == "ppo":
+        agent = NeuralPPO(env, lr_actor, lr_critic, optimizer,
+                          gamma, epochs, eps_clip, device)
+    else:  # logic
+        agent = LogicPPO(env, rules, lr_actor, lr_critic, optimizer,
+                         gamma, epochs, eps_clip, device)
         print('Candidate Clauses:')
         for clause in agent.policy.actor.clauses:
             print(clause)
-    else:
-        raise ValueError("Invalid algorithm.")
 
     i_episode = 0
     weights_list = []
 
-    if args.recover:
-        if args.alg == 'logic':
-            step_list, reward_list, weights_list = agent.load(checkpoint_dir)
-        else:
+    if recover:
+        if algorithm == 'ppo':
             step_list, reward_list = agent.load(checkpoint_dir)
+        else:  # logic
+            step_list, reward_list, weights_list = agent.load(checkpoint_dir)
         time_step = max(step_list)[0]
     else:
         step_list = []
@@ -171,33 +130,29 @@ def main():
 
     # track total training time
     start_time = time.time()
-    print("Started training at (GMT) : ", start_time)
-
-    print("============================================================================================")
+    print("Started training at (GMT):", start_time)
 
     # printing and logging variables
     print_running_reward = 0
     print_running_episodes = 0
 
     rtpt = RTPT(name_initials='HS', experiment_name='LogicRL',
-                max_iterations=max_training_timesteps)
+                max_iterations=total_steps)
 
     # Start the RTPT tracking
-    folder_name = f"{args.m}_{args.env}_{args.alg}_{args.rules}_s{args.seed}"
-    folder_name += datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
-    writer = SummaryWriter(f"runs/{folder_name}")
+    writer = SummaryWriter(str(log_dir))
     rtpt.start()
 
     # training loop
-    pbar = tqdm(total=max_training_timesteps-time_step, file=sys.stdout)
-    while time_step <= max_training_timesteps:
+    pbar = tqdm(total=total_steps - time_step, file=sys.stdout)
+    while time_step <= total_steps:
         #  initialize game
         state = env.reset()
 
         # state = initialize_game(env, args)
         current_ep_reward = 0
 
-        epsilon = epsilon_func(i_episode)
+        epsilon = epsilon_fn(i_episode)
 
         for t in range(1, max_ep_len + 1):
             action = agent.select_action(state, epsilon=epsilon)
@@ -212,48 +167,39 @@ def main():
             rtpt.step()
             current_ep_reward += reward
 
-            if time_step % update_timestep == 0:
+            if time_step % update_steps == 0:
                 agent.update()
 
             # printing average reward
-            if time_step % print_freq == 0:
+            if time_step % print_steps == 0:
                 # print average reward till last episode
                 print_avg_reward = print_running_reward / print_running_episodes
                 print_avg_reward = round(print_avg_reward, 2)
 
-                print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step,
-                                                                                        print_avg_reward))
-                # wandb.log({'reward': print_avg_reward}, step=time_step)
+                print(f"Episode: {i_episode} \t\t Timestep: {time_step} \t\t Average Reward: {print_avg_reward}")
                 print_running_reward = 0
                 print_running_episodes = 0
 
                 step_list.append([time_step])
                 reward_list.append([print_avg_reward])
-                if args.alg == 'logic':
+                if algorithm == 'logic':
                     weights_list.append([(agent.get_weights().tolist())])
 
             # save model weights
-            if time_step % save_model_freq == 0:
-                print("--------------------------------------------------------------------------------------------")
-                checkpoint_path = checkpoint_dir / "{}_{}_step_{}.pth".format(args.alg, args.env,
-                                                                         time_step)
-                print("saving model at :", checkpoint_path)
-                if args.alg == 'logic':
+            if time_step % save_steps == 0:
+                checkpoint_path = checkpoint_dir / f"step_{time_step}.pth"
+                if algorithm == 'logic':
                     agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list, weights_list)
                 else:
                     agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list)
-                print("model saved")
-                print("Elapsed Time  : ", time.time() - start_time)
-                print("--------------------------------------------------------------------------------------------")
+                print("Saved model at:", checkpoint_path)
+                print("Elapsed Time : ", time.time() - start_time)
 
                 # save image of weights
-                # if args.plot:
-                #     if args.alg == 'logic':
-                #         plot_weights(agent.get_weights(), image_directory, time_step)
+                # if plot and algorithm == 'logic':
+                #     plot_weights(agent.get_weights(), image_dir, time_step)
 
-            # break; if the episode is over
             if done:
-                # print("Game over. New episode.")
                 break
 
         print_running_reward += current_ep_reward
@@ -265,26 +211,33 @@ def main():
     env.close()
 
     # print total training time
-    print("============================================================================================")
-    with open(checkpoint_dir + '/' + 'data.csv', 'w', newline='') as f:
+    with open(checkpoint_dir / 'data.csv', 'w', newline='') as f:
         dataset = csv.writer(f)
         header = ('steps', 'reward')
         dataset.writerow(header)
         data = np.hstack((step_list, reward_list))
         for row in data:
             dataset.writerow(row)
-    if args.alg == 'logic':
-        with open(checkpoint_dir + '/' + 'weights.csv', 'w', newline='') as f:
+
+    if algorithm == 'logic':
+        with open(checkpoint_dir / 'weights.csv', 'w', newline='') as f:
             dataset = csv.writer(f)
             for row in weights_list:
                 dataset.writerow(row)
 
     end_time = time.time()
-    print("Started training at (GMT) : ", start_time)
-    print("Finished training at (GMT) : ", end_time)
-    print("Total training time  : ", end_time - start_time)
-    print("============================================================================================")
+    print("Started training at (GMT):", start_time)
+    print("Finished training at (GMT):", end_time)
+    print("Total training time:", end_time - start_time)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        config_path = sys.argv[1]
+    else:
+        config_path = IN_PATH / "config" / "default.yaml"
+
+    with open(config_path, "r") as f:
+        config = yaml.load(f, Loader=yaml.Loader)
+
+    main(**config)
