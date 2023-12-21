@@ -1,5 +1,7 @@
 algorithm: logic
-environment: freeway
+environment: loot
+env_kwargs:
+  variant: loot
 rules: default
 total_steps: 20
 save_steps: 15

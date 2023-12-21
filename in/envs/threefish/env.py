@@ -2,7 +2,7 @@ from typing import Sequence
 
 from nudge.env import NudgeBaseEnv
 import numpy as np
-from ..loot.procgen.procgen import ProcgenGym3Env
+from env_src.procgen.procgen import ProcgenGym3Env
 import torch
 
 
@@ -17,8 +17,9 @@ class NudgeEnv(NudgeBaseEnv):
     }
     pred_names: Sequence
 
-    def __init__(self, mode: str, variant: str):
+    def __init__(self, mode: str, variant: str = "threefish"):
         super().__init__(mode)
+        assert variant in ["threefish", "threefishcolor"]
         self.variant = variant
         self.env = ProcgenGym3Env(num=1, env_name='threefish', render_mode=None)
 
@@ -73,7 +74,7 @@ class NudgeEnv(NudgeBaseEnv):
                     logic_state[i, -1] = raw_state[i, 1]  # Y
 
         else:
-            raise ValueError(f"Invalid ThreeFish variant '{variant}'.")
+            raise ValueError(f"Invalid ThreeFish variant '{self.variant}'.")
 
         logic_state = logic_state.unsqueeze(0)
         return logic_state.cuda()

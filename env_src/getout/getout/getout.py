@@ -7,11 +7,15 @@ from .level import Level
 from .trackingCamera import TrackingCamera
 from .resource_loader import ResourceLoader
 from .player_v1 import Player
+from gymnasium.spaces import Discrete
 
 
 class Getout:
 
     def __init__(self, render=True, resource_path=None, start_on_first_action=False, width=50):
+        self.unwrapped = self
+        self.action_space = Discrete(5)
+        self.observation_space = ...  # TODO
         self.zoom = 42 - width//2
 
         if resource_path is None:

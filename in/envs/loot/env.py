@@ -2,7 +2,7 @@ from typing import Sequence
 
 from nudge.env import NudgeBaseEnv
 import numpy as np
-from procgen.procgen import ProcgenGym3Env
+from env_src.procgen.procgen import ProcgenGym3Env
 import torch
 
 
@@ -17,8 +17,9 @@ class NudgeEnv(NudgeBaseEnv):
     }
     pred_names: Sequence
 
-    def __init__(self, mode: str, variant: str):
+    def __init__(self, mode: str, variant: str = "loot"):
         super().__init__(mode)
+        assert variant in ["loot", "loothard", "lootplus", "lootcolor"]
         self.variant = variant
         self.env = ProcgenGym3Env(num=1, env_name='loot', render_mode=None)
 
@@ -35,7 +36,7 @@ class NudgeEnv(NudgeBaseEnv):
 
     def extract_logic_state(self, raw_state):
         states = torch.from_numpy(raw_state['positions']).squeeze()
-        if self.variant == 'lootplus':
+        if self.variant == "lootplus":
             # input shape: [X,Y]* [agent,key_b,door_b,key_g,door_g,key_r,door_r]
             # output shape:[agent, key, door, blue, green, red ,got_key, X, Y]
             state_extracted = torch.tensor([
@@ -53,7 +54,7 @@ class NudgeEnv(NudgeBaseEnv):
                 elif i in [2, 4, 6] and state[-1] != 0 and state_extracted[i - 1][1] == 0:
                     state_extracted[i][-3] = 1
 
-        elif self.variant == 'loothard':
+        elif self.variant == "loothard":
             # input shape: [X,Y]* [agent, key_b, door_b, key_g, door_g, exit]
             # output shape:[agent, key, door, blue, green, exit,got_key, X, Y]
             state_extracted = torch.tensor([
@@ -92,7 +93,7 @@ class NudgeEnv(NudgeBaseEnv):
                     state_extracted[i][-3] = 1
 
         else:
-            raise ValueError(f"Invalid Loot variant '{variant}'.")
+            raise ValueError(f"Invalid Loot variant '{self.variant}'.")
 
         state_extracted = state_extracted.unsqueeze(0)
         return state_extracted
@@ -141,7 +142,7 @@ class NudgeEnv(NudgeBaseEnv):
             state_extracted[:, 0:2] = state[0][:]
 
         else:
-            raise ValueError(f"Invalid Loot variant '{variant}'.")
+            raise ValueError(f"Invalid Loot variant '{self.variant}'.")
 
         state_extracted = state_extracted.reshape(-1).tolist()
         return torch.tensor(state_extracted)

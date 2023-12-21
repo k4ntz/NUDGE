@@ -3,7 +3,8 @@ from typing import Sequence
 
 from nudge.env import NudgeBaseEnv
 import numpy as np
-import gymnasium as gym
+import gymnasium
+from gymnasium.envs.registration import register
 from nudge.utils import simulate_prob
 import torch
 
@@ -23,7 +24,9 @@ class NudgeEnv(NudgeBaseEnv):
         super().__init__(mode)
         self.plusplus = plusplus
         self.noise = noise
-        self.env = gym.make("getout", generator_args={"spawn_all_entities": False})  # FIXME
+        register(id="getout",
+                 entry_point="env_src.getout.getout.getout:Getout")
+        self.env = gymnasium.make("getout")  # FIXME
 
     def reset(self):
         state = self.env.reset()
