@@ -180,7 +180,7 @@ class LogicPPO:
 
     def save(self, checkpoint_path, directory, step_list, reward_list, weight_list):
         torch.save(self.policy_old.state_dict(), checkpoint_path)
-        with open(directory + '/' + "data.pkl", "wb") as f:
+        with open(directory / "data.pkl", "wb") as f:
             pickle.dump(step_list, f)
             pickle.dump(reward_list, f)
             pickle.dump(weight_list, f)

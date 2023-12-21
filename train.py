@@ -3,10 +3,9 @@ import csv
 import os
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
-
-sys.path.insert(0, '../')
 
 from rtpt import RTPT
 from tqdm import tqdm
@@ -18,6 +17,9 @@ from utils import make_deterministic
 from torch.utils.tensorboard import SummaryWriter
 import datetime
 from env import NudgeBaseEnv
+
+
+OUT_PATH = Path("out/")
 
 
 def main():
@@ -93,25 +95,14 @@ def main():
     # wandb.init(project="LOOT", entity="nyrus", config=config, name=runs_name)
     # wandb.init(project="THREEFISH", entity="nyrus", config=config, name=runs_name)
 
-    ################### checkpointing ###################
+    checkpoint_dir = OUT_PATH / "checkpoints" / args.env / args.alg / str(args.seed)
+    image_dir = OUT_PATH / "images" / args.env / args.alg / str(args.seed)
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    os.makedirs(image_dir, exist_ok=True)
 
-    directory = "checkpoints"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    checkpoint_path = checkpoint_dir / "{}_{}.pth".format(args.env, 0)
 
-    if args.rules is not None:
-        directory = directory + '/' + args.m + '/' + args.alg + '/' + args.env + '/' + args.rules + '/' + str(
-            args.seed) + '/'
-    else:
-        directory = directory + '/' + args.m + '/' + args.alg + '/' + args.env + '/' + str(args.seed) + '/'
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    # if not args.recover:
-
-    checkpoint_path = directory + "{}_{}.pth".format(args.env, 0)
-
-    print("save checkpoint path : " + checkpoint_path)
+    print("save checkpoint path :", checkpoint_path)
 
     #####################################################
 
@@ -161,39 +152,28 @@ def main():
         print('Candidate Clauses:')
         for clause in agent.policy.actor.clauses:
             print(clause)
+    else:
+        raise ValueError("Invalid algorithm.")
 
-    time_step = 0
     i_episode = 0
+    weights_list = []
 
     if args.recover:
         if args.alg == 'logic':
-            step_list, reward_list, weights_list = agent.load(directory)
-            time_step = max(step_list)[0]
+            step_list, reward_list, weights_list = agent.load(checkpoint_dir)
         else:
-            step_list, reward_list = agent.load(directory)
-            time_step = max(step_list)[0]
+            step_list, reward_list = agent.load(checkpoint_dir)
+        time_step = max(step_list)[0]
     else:
         step_list = []
         reward_list = []
-        weights_list = []
+        time_step = 0
 
     # track total training time
     start_time = time.time()
     print("Started training at (GMT) : ", start_time)
 
     print("============================================================================================")
-
-    image_directory = "image"
-    if not os.path.exists(image_directory):
-        os.makedirs(image_directory)
-
-    if args.rules:
-        image_directory = image_directory + '/' + args.m + '/' + args.env + '/' + args.rules + '/' + str(
-            args.seed) + '/'
-    else:
-        image_directory = image_directory + '/' + args.m + '/' + args.env + '/' + str(args.seed) + '/'
-    if not os.path.exists(image_directory):
-        os.makedirs(image_directory)
 
     # printing and logging variables
     print_running_reward = 0
@@ -209,7 +189,7 @@ def main():
     rtpt.start()
 
     # training loop
-    pbar = tqdm(total=max_training_timesteps-time_step)
+    pbar = tqdm(total=max_training_timesteps-time_step, file=sys.stdout)
     while time_step <= max_training_timesteps:
         #  initialize game
         state = env.reset()
@@ -255,13 +235,13 @@ def main():
             # save model weights
             if time_step % save_model_freq == 0:
                 print("--------------------------------------------------------------------------------------------")
-                checkpoint_path = directory + "{}_{}_step_{}.pth".format(args.alg, args.env,
+                checkpoint_path = checkpoint_dir / "{}_{}_step_{}.pth".format(args.alg, args.env,
                                                                          time_step)
-                print("saving model at : " + checkpoint_path)
+                print("saving model at :", checkpoint_path)
                 if args.alg == 'logic':
-                    agent.save(checkpoint_path, directory, step_list, reward_list, weights_list)
+                    agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list, weights_list)
                 else:
-                    agent.save(checkpoint_path, directory, step_list, reward_list)
+                    agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list)
                 print("model saved")
                 print("Elapsed Time  : ", time.time() - start_time)
                 print("--------------------------------------------------------------------------------------------")
@@ -286,7 +266,7 @@ def main():
 
     # print total training time
     print("============================================================================================")
-    with open(directory + '/' + 'data.csv', 'w', newline='') as f:
+    with open(checkpoint_dir + '/' + 'data.csv', 'w', newline='') as f:
         dataset = csv.writer(f)
         header = ('steps', 'reward')
         dataset.writerow(header)
@@ -294,7 +274,7 @@ def main():
         for row in data:
             dataset.writerow(row)
     if args.alg == 'logic':
-        with open(directory + '/' + 'weights.csv', 'w', newline='') as f:
+        with open(checkpoint_dir + '/' + 'weights.csv', 'w', newline='') as f:
             dataset = csv.writer(f)
             for row in weights_list:
                 dataset.writerow(row)
