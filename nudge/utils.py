@@ -1,13 +1,24 @@
 import random
 import numpy as np
 import torch
+import yaml
+
+
+def save_hyperparams(signature, local_scope, save_path, print_summary: bool = False):
+    hyperparams = {}
+    for param in signature.parameters:
+        hyperparams[param] = local_scope[param]
+    with open(save_path, 'w') as f:
+        yaml.dump(hyperparams, f)
+    if print_summary:
+        print("Hyperparameter Summary:")
+        print(open(save_path).read())
 
 
 def make_deterministic(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-    print(f"Set all environment deterministic to seed {seed}")
 
 
 def add_noise(obj, index_obj, num_of_objs):

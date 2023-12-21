@@ -68,3 +68,6 @@ class NudgeEnv(NudgeBaseEnv):
             neural_state.extend([[0] * 6 for _ in range(11 - len(neural_state))])
 
         return neural_state
+
+    def close(self):
+        self.env.close()

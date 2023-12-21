@@ -1,0 +1,8 @@
+algorithm: logic
+environment: freeway
+rules: default
+total_steps: 20
+save_steps: 15
+update_steps: 10
+max_ep_len: 20
+stats_steps: 2

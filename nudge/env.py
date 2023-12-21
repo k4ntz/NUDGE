@@ -49,3 +49,6 @@ class NudgeBaseEnv(ABC):
         env_path = f"in/envs/{name}/env.py"
         env_module = load_module(env_path)
         return env_module.NudgeEnv(**kwargs)
+
+    def close(self):
+        pass

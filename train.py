@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from typing import Callable
 import math
+from inspect import signature
 
 from torch.optim import Optimizer, Adam
 import yaml
@@ -16,16 +17,17 @@ from tqdm import tqdm
 
 from agents.logic_agent import LogicPPO
 from agents.neural_agent import NeuralPPO
-from utils import make_deterministic
+from utils import make_deterministic, save_hyperparams
 from torch.utils.tensorboard import SummaryWriter
-import datetime
+from datetime import datetime
 from env import NudgeBaseEnv
 
 OUT_PATH = Path("out/")
 IN_PATH = Path("in/")
 
 
-def epsilon_fn(episode: int):
+def exp_decay(episode: int):
+    """Reaches 2% after about 850 episodes."""
     return max(math.exp(-episode / 500), 0.02)
 
 
@@ -44,12 +46,10 @@ def main(algorithm: str,
          optimizer: Optimizer = Adam,
          lr_actor: float = 0.001,
          lr_critic: float = 0.0003,
-         epsilon_fn: Callable = epsilon_fn,
+         epsilon_fn: Callable = exp_decay,
          recover: bool = False,
-         plot: bool = False,
          save_steps: int = 250000,
-         print_steps: int = 2000,
-         log_steps: int = 2000,
+         stats_steps: int = 2000,
          ):
     """
 
@@ -75,15 +75,16 @@ def main(algorithm: str,
             exploration
         recover: If true, tries to reload an existing run that was interrupted
             before completion.
-        plot: If true, plots the weights
         save_steps: Number of steps between each checkpoint save
-        print_steps: Number of steps between each statistics summary print
-        log_steps: Number of steps between each statistics logging
+        stats_steps: Number of steps between each statistics summary timestamp
     """
 
     make_deterministic(seed)
 
     assert algorithm in ['ppo', 'logic']
+
+    if env_kwargs is None:
+        env_kwargs = dict()
 
     if update_steps is None:
         if algorithm == 'ppo':
@@ -91,17 +92,20 @@ def main(algorithm: str,
         else:
             update_steps = 100
 
-    env = NudgeBaseEnv.from_name(environment, mode=algorithm)
+    env = NudgeBaseEnv.from_name(environment, mode=algorithm, **env_kwargs)
 
-    now_str = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
-    experiment_dir = OUT_PATH / "runs" / environment / algorithm / now_str
+    now = datetime.now()
+    experiment_dir = OUT_PATH / "runs" / environment / algorithm / now.strftime("%y-%m-%d-%H-%M")
     checkpoint_dir = experiment_dir / "checkpoints"
     image_dir = experiment_dir / "images"
     log_dir = experiment_dir
     os.makedirs(checkpoint_dir, exist_ok=True)
     os.makedirs(image_dir, exist_ok=True)
 
-    # TODO: print summary and save config
+    save_hyperparams(signature=signature(main),
+                     local_scope=locals(),
+                     save_path=experiment_dir / "config.yaml",
+                     print_summary=True)
 
     # initialize agent
     if algorithm == "ppo":
@@ -113,6 +117,7 @@ def main(algorithm: str,
         print('Candidate Clauses:')
         for clause in agent.policy.actor.clauses:
             print(clause)
+        print()
 
     i_episode = 0
     weights_list = []
@@ -130,11 +135,11 @@ def main(algorithm: str,
 
     # track total training time
     start_time = time.time()
-    print("Started training at (GMT):", start_time)
+    print("Started training at ", now.strftime("%H:%M"))
 
     # printing and logging variables
-    print_running_reward = 0
-    print_running_episodes = 0
+    running_ret = 0  # running return
+    n_episodes = 0
 
     rtpt = RTPT(name_initials='HS', experiment_name='LogicRL',
                 max_iterations=total_steps)
@@ -143,18 +148,15 @@ def main(algorithm: str,
     writer = SummaryWriter(str(log_dir))
     rtpt.start()
 
-    # training loop
     pbar = tqdm(total=total_steps - time_step, file=sys.stdout)
-    while time_step <= total_steps:
-        #  initialize game
+    while time_step < total_steps:
         state = env.reset()
-
-        # state = initialize_game(env, args)
-        current_ep_reward = 0
-
+        ret = 0  # return
+        n_episodes += 1
         epsilon = epsilon_fn(i_episode)
 
-        for t in range(1, max_ep_len + 1):
+        # Play episode
+        for t in range(max_ep_len):
             action = agent.select_action(state, epsilon=epsilon)
 
             state, reward, done = env.step(action)
@@ -165,23 +167,23 @@ def main(algorithm: str,
             time_step += 1
             pbar.update(1)
             rtpt.step()
-            current_ep_reward += reward
+            ret += reward
 
             if time_step % update_steps == 0:
                 agent.update()
 
             # printing average reward
-            if time_step % print_steps == 0:
+            if time_step % stats_steps == 0:
                 # print average reward till last episode
-                print_avg_reward = print_running_reward / print_running_episodes
-                print_avg_reward = round(print_avg_reward, 2)
+                avg_return = running_ret / n_episodes
+                avg_return = round(avg_return, 2)
 
-                print(f"Episode: {i_episode} \t\t Timestep: {time_step} \t\t Average Reward: {print_avg_reward}")
-                print_running_reward = 0
-                print_running_episodes = 0
+                print(f"\nEpisode: {i_episode} \t\t Timestep: {time_step} \t\t Average Reward: {avg_return}")
+                running_ret = 0
+                n_episodes = 1
 
                 step_list.append([time_step])
-                reward_list.append([print_avg_reward])
+                reward_list.append([avg_return])
                 if algorithm == 'logic':
                     weights_list.append([(agent.get_weights().tolist())])
 
@@ -192,26 +194,20 @@ def main(algorithm: str,
                     agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list, weights_list)
                 else:
                     agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list)
-                print("Saved model at:", checkpoint_path)
-                print("Elapsed Time : ", time.time() - start_time)
-
-                # save image of weights
-                # if plot and algorithm == 'logic':
-                #     plot_weights(agent.get_weights(), image_dir, time_step)
+                print("\nSaved model at:", checkpoint_path)
 
             if done:
                 break
 
-        print_running_reward += current_ep_reward
-        print_running_episodes += 1
+        running_ret += ret
         i_episode += 1
-        writer.add_scalar('Episode reward', current_ep_reward, i_episode)
+        writer.add_scalar('Return', ret, i_episode)
         writer.add_scalar('Epsilon', epsilon, i_episode)
 
     env.close()
+    pbar.close()
 
-    # print total training time
-    with open(checkpoint_dir / 'data.csv', 'w', newline='') as f:
+    with open(experiment_dir / 'data.csv', 'w', newline='') as f:
         dataset = csv.writer(f)
         header = ('steps', 'reward')
         dataset.writerow(header)
@@ -220,15 +216,14 @@ def main(algorithm: str,
             dataset.writerow(row)
 
     if algorithm == 'logic':
-        with open(checkpoint_dir / 'weights.csv', 'w', newline='') as f:
+        with open(experiment_dir / 'weights.csv', 'w', newline='') as f:
             dataset = csv.writer(f)
             for row in weights_list:
                 dataset.writerow(row)
 
     end_time = time.time()
-    print("Started training at (GMT):", start_time)
-    print("Finished training at (GMT):", end_time)
-    print("Total training time:", end_time - start_time)
+    print("Finished training at", datetime.now().strftime("%H:%M"))
+    print(f"Total training time: {(end_time - start_time) / 60 :.0f} min")
 
 
 if __name__ == "__main__":

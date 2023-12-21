@@ -152,3 +152,6 @@ class NudgeEnv(NudgeBaseEnv):
             return action_space[model_action]
         else:
             return super().map_action(model_action)
+
+    def close(self):
+        self.env.close()

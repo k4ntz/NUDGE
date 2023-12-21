@@ -53,3 +53,6 @@ class NudgeEnv(NudgeBaseEnv):
                 neural_state.append([0, 1, 0, 0] + list(inst.xy))
 
         return np.array(neural_state).reshape(-1)
+
+    def close(self):
+        self.env.close()

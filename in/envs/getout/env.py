@@ -84,6 +84,9 @@ class NudgeEnv(NudgeBaseEnv):
         state = torch.cat([state['base'], state['entities']], dim=1)
         return state
 
+    def close(self):
+        self.env.close()
+
 
 def for_each_tensor(o, fn):
     if isinstance(o, torch.Tensor):
