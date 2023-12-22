@@ -1,7 +1,7 @@
 # NUDGE
 
 This is the implementation of **Neurally gUided Differentiable loGic policiEs (NUDGE)**, a framework for logic RL agents based on differentiable forward reasoning with first-order logic (FOL).
-![](image/LogicRL.png)
+![](docs/LogicRL.png)
 
 ## Quickstart
 
