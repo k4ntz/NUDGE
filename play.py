@@ -3,7 +3,9 @@ import torch
 import os
 
 from utils import make_deterministic
-from utils_game import render_getout, render_threefish, render_loot, render_ecoinrun, render_atari
+from env_src.render_atari import render_atari
+from env_src.procgen.render import render_loot, render_ecoinrun, render_threefish
+from env_src.getout.getout.render import render_getout
 from agents.neural_agent import ActorCritic, NeuralPlayer
 from agents.logic_agent import NsfrActorCritic, LogicPlayer
 from agents.random_agent import RandomPlayer

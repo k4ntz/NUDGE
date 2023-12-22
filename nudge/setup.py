@@ -8,7 +8,7 @@ with open("../requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name='nudge',
-    version='0.1.0',
+    version='0.5.0',
     author='Hikaru Shindo',
     author_email='hikisan.gouv',
     packages=find_packages(),
