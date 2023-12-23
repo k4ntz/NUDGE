@@ -224,9 +224,9 @@ class TensorEncoder(object):
         # in case there is no variables in the body
         if len(list(set(dtypes))) == 0:
             return []
-        # check the data type consistency
-        assert len(list(set(dtypes))) == 1, "Invalid existentially quantified variables. " + \
-            str(len(list(set(dtypes)))) + " data types in the body."
+        # TODO: check the data type consistency (is this assertion needed?)
+        # assert len(list(set(dtypes))) == 1, "Invalid existentially quantified variables. " + \
+        #     str(len(list(set(dtypes)))) + " data types in the body."
 
         vars = list(set(vars))
         n_vars = len(vars)

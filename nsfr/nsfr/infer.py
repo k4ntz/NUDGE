@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .torch_utils import softor, weight_sum
+from nsfr.utils.torch import softor, weight_sum
 
 
 def init_identity_weights(X, device):

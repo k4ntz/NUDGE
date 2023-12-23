@@ -30,7 +30,7 @@ def subs(exp, target_var, const):
         terms = [subs(term, target_var, const) for term in exp.terms]
         return Atom(exp.pred, terms)
     elif type(exp) == FuncTerm:
-        args = [subs(arg, target_var, const) for arg in exp.args]
+        args = [subs(arg, target_var, const) for arg in exp.env]
         return FuncTerm(exp.func_symbol, args)
     elif type(exp) == Var:
         if exp.name == target_var.name:
@@ -205,7 +205,7 @@ def occur_check(variable, term):
         return variable.name == term.name
     else:
         # func term case
-        for arg in term.args:
+        for arg in term.env:
             if occur_check(variable, arg):
                 return True
         return False

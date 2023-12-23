@@ -6,8 +6,6 @@ from tqdm import tqdm
 import torch
 import numpy as np
 
-device = torch.device("cuda:0")
-
 
 class ClauseGenerator(object):
     """
@@ -267,7 +265,7 @@ class ClauseGenerator(object):
             action_probs = action_probs[:, 1]
             actions = [1 if i == 1 else 0 for i in actions]
         #
-        return action_probs, torch.tensor(actions, device=device)
+        return action_probs, torch.tensor(actions, device=self.device)
 
     def get_action_probs_h(self, predname):
         action_probs = self.buffer.action_probs.squeeze(1)
@@ -287,4 +285,4 @@ class ClauseGenerator(object):
             action_probs = action_probs[:, 1]
             actions = [1 if i == 1 else 0 for i in actions]
 
-        return action_probs, torch.tensor(actions, device=device)
+        return action_probs, torch.tensor(actions, device=self.device)

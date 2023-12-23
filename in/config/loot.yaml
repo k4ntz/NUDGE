@@ -1,0 +1,4 @@
+algorithm: ppo
+environment: loot
+rules: default
+update_steps: 5000000

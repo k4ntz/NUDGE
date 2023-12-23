@@ -1,11 +1,8 @@
-### NSFR
-gym
+gymnasium[atari,accept-rom-license]
 gym3
-#torch==1.12.1
+torch==1.12.1
 lark-parser
 scikit-learn
-gym
-gym3
 filelock
 pyglet
 torchsummary
@@ -25,4 +22,4 @@ cmake
 rtpt
 wandb
 pyglet
-###qt
+ocatari

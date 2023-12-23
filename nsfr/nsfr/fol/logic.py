@@ -253,7 +253,7 @@ class FuncTerm(Term):
             if self.func_symbol != other.func_symbol:
                 return False
             for i in range(len(self.args)):
-                if not self.args[i] == other.args[i]:
+                if not self.args[i] == other.env[i]:
                     return False
             return True
         else:
@@ -281,7 +281,7 @@ class FuncTerm(Term):
                 result[0] = x
             else:
                 if type(x) == FuncTerm:
-                    for term in x.args:
+                    for term in x.env:
                         index[0] += 1
                         _loop(term, i)
         _loop(self, i)
@@ -294,7 +294,7 @@ class FuncTerm(Term):
             nonlocal ls
             if type(x) == FuncTerm:
                 ls.append(x.func_symbol)
-                for term in x.args:
+                for term in x.env:
                     _to_list(term)
             else:
                 # const or var
