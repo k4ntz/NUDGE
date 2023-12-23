@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 from PIL import ImageDraw, ImageFont
 
-from actions import GetoutActions
-from getout import Getout
-from paramLevelGenerator import ParameterizedLevelGenerator
+from .actions import GetoutActions
+from .getout import Getout
+from .paramLevelGenerator import ParameterizedLevelGenerator
 from ..imageviewer import ImageViewer
 
 font_path = os.path.join(cv2.__path__[0], 'qt', 'fonts', 'DejaVuSans.ttf')

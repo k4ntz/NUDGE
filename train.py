@@ -15,12 +15,12 @@ import numpy as np
 from rtpt import RTPT
 from tqdm import tqdm
 
-from agents.logic_agent import LogicPPO
-from agents.neural_agent import NeuralPPO
-from utils import make_deterministic, save_hyperparams
+from nudge.agents.logic_agent import LogicPPO
+from nudge.agents.neural_agent import NeuralPPO
+from nudge.utils import make_deterministic, save_hyperparams
+from nudge.env import NudgeBaseEnv
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
-from env import NudgeBaseEnv
 
 OUT_PATH = Path("out/")
 IN_PATH = Path("in/")
