@@ -38,14 +38,12 @@ class ValuationModule(nn.Module, ABC):
     lang: Language
     device: Union[torch.device, str]
     val_fns: Dict[str, ValuationFunction]  # predicate names to corresponding valuation fn
-    attrs: Dict[Any, torch.Tensor]  # attribute terms to corresponding one-hot encoding
-    dataset: str
 
     def __init__(self, val_fn_path: str, lang: Language, device: Union[torch.device, str],
                  pretrained: bool = True):
         super().__init__()
 
-        # Parse all value functions
+        # Parse all valuation functions
         val_fn_module = load_module(val_fn_path)
         all_functions = inspect.getmembers(val_fn_module, inspect.isfunction)
         self.val_fns = {fn[0]: fn[1] for fn in all_functions}
@@ -53,9 +51,6 @@ class ValuationModule(nn.Module, ABC):
         self.lang = lang
         self.device = device
         self.pretrained = pretrained
-
-    def init_valuation_functions(self) -> Sequence[ValuationFunction]:
-        raise NotImplementedError()
 
     def forward(self, zs: torch.Tensor, atom: Atom):
         """Convert the object-centric representation to a valuation tensor.
