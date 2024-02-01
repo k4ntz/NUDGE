@@ -67,7 +67,9 @@ class DataUtils(object):
         lines = f.readlines()
         consts = []
         for line in lines:
-            consts.extend(self.parse_const(line))
+            line = line.replace('\n', '')
+            if len(line) > 0:
+                consts.extend(self.parse_const(line))
         return consts
 
     def parse_pred(self, line):
@@ -104,7 +106,6 @@ class DataUtils(object):
     def parse_const(self, line):
         """Parse string to function symbols.
         """
-        line = line.replace('\n', '')
         dtype_name, const_names_str = line.split(':')
         dtype = DataType(dtype_name)
         const_names = const_names_str.split(',')
