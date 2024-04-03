@@ -199,15 +199,13 @@ class TensorEncoder(object):
 
         Generate the possible substitutions from given list of atoms. If the body contains any variables,
         then generate the substitutions by enumerating constants that matches the data type.
-        !!! ASSUMPTION: The body has variables that have the same data type 
-            e.g. variables O1(object) and Y(color) cannot appear in one clause !!!
-
         Args:
             body (list(atom)): The body atoms which may contain existentially quantified variables.
 
         Returns:
             theta_list (list(substitution)): The list of substitutions of the given body atoms.
         """
+        # example: body = [on_left(O2,O1)]
         # extract all variables and corresponding data types from given body atoms
         var_dtype_list = []
         dtypes = []
@@ -224,26 +222,34 @@ class TensorEncoder(object):
         # in case there is no variables in the body
         if len(list(set(dtypes))) == 0:
             return []
-        # TODO: check the data type consistency (is this assertion needed?)
-        # assert len(list(set(dtypes))) == 1, "Invalid existentially quantified variables. " + \
-        #     str(len(list(set(dtypes)))) + " data types in the body."
-
-        vars = list(set(vars))
-        n_vars = len(vars)
-        consts = self.lang.get_by_dtype(dtypes[0])
-
-        # e.g. if the data type is shape, then subs_consts_list = [(red,), (yellow,), (blue,)]
-        subs_consts_list = itertools.permutations(consts, n_vars)
-
+        
+        # {O2: [obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11], O1: [obj1]}
+        var_to_consts_dic = {}
+        for v, dtype in var_dtype_list:
+            if not v in var_to_consts_dic:
+                var_to_consts_dic[v] = self.lang.get_by_dtype(dtype)
+        
+        # [[obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11], [obj1]]
+        subs_consts_list = list(var_to_consts_dic.values())
+        # for v in vars:
+        #     subs_consts_list.append(var_to_consts_dic[v])
+            
+        
+        # [(obj2, obj1), (obj3, obj1), (obj4, obj1), (obj5, obj1), (obj6, obj1), (obj7, obj1), (obj8, obj1), (obj9, obj1), (obj10, obj1), (obj11, obj1)]
+        subs_consts_list_by_product = list(itertools.product(*subs_consts_list))
+        
+        # [O2, O1]
+        subs_vars = list(var_to_consts_dic.keys())
+        
+        # [[(O2, obj2), (O1, obj1)], [(O2, obj3), (O1, obj1)], ...]
         theta_list = []
-        # generate substitutions by combining variables to the head of subs_consts_list
-        for subs_consts in subs_consts_list:
+        for subs_consts in subs_consts_list_by_product:
             theta = []
+            
             for i, const in enumerate(subs_consts):
-                s = (vars[i], const)
+                s = (subs_vars[i], const)
                 theta.append(s)
             theta_list.append(theta)
-        # e.g. theta_list: [[(Z, red)], [(Z, yellow)], [(Z, blue)]]
         return theta_list
 
     def facts_to_index(self, atoms):

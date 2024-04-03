@@ -32,7 +32,8 @@ class DataUtils(object):
         clauses = []
         with open(path) as f:
             for line in f:
-                tree = self.lp_clause.parse(line[:-1])
+                line = line.replace('\n', '')
+                tree = self.lp_clause.parse(line)
                 clause = ExpTree(lang).transform(tree)
                 clauses.append(clause)
         return clauses
