@@ -16,7 +16,7 @@ class NudgeEnv(NudgeBaseEnv):
 
     def __init__(self, mode: str):
         super().__init__(mode)
-        self.env = OCAtari(env_name="ALE/Freeway-v5", mode="revised", render_mode="rgb_array")
+        self.env = OCAtari(env_name="ALE/Freeway-v5", mode="ram", render_mode="rgb_array")
 
     def reset(self):
         self.env.reset()

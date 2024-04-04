@@ -1,4 +1,4 @@
 algorithm: logic
-environment: freeway
+environment: seaquest
 rules: default
 update_steps: 100
