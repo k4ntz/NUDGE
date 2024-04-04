@@ -62,7 +62,10 @@ class ValuationModule(nn.Module, ABC):
             Returns:
                 A batch of the probabilities of the target atom.
         """
-        val_fn = self.val_fns[atom.pred.name]
+        try:
+            val_fn = self.val_fns[atom.pred.name]
+        except KeyError as e:
+            raise NotImplementedError(f"Missing implementation for valuation function '{atom.pred.name}'.")
         # term: logical term
         # args: the vectorized input evaluated by the value function
         args = [self.ground_to_tensor(term, zs) for term in atom.terms]
