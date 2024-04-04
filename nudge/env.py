@@ -7,15 +7,19 @@ import torch
 class NudgeBaseEnv(ABC):
     name: str
     pred2action: Dict[str, int]  # predicate name to action index
+    env: object  # the wrapped environment
 
     def __init__(self, mode: str):
         self.mode = mode  # either 'ppo' or 'logic'
 
-    def reset(self):
+    def reset(self) -> (torch.tensor, torch.tensor):
+        """Returns logic_state, neural_state"""
         raise NotImplementedError
 
-    def step(self, action) -> ((torch.tensor, torch.tensor), float, bool):
-        """Returns (logic_state, neural_state), reward, done"""
+    def step(self, action, is_mapped: bool = False) -> ((torch.tensor, torch.tensor), float, bool):
+        """If is_mapped is False, the action will be mapped from model action space to env action space.
+        I.e., if is_mapped is True, this method feeds 'action' into the wrapped env directly.
+        Returns (logic_state, neural_state), reward, done"""
         raise NotImplementedError
 
     def extract_logic_state(self, raw_state) -> torch.tensor:

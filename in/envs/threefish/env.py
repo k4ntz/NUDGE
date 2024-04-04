@@ -27,8 +27,10 @@ class NudgeEnv(NudgeBaseEnv):
         _, state, _ = self.env.observe()
         return self.convert_state(state)
 
-    def step(self, action):
-        action = np.array([self.map_action(action)])
+    def step(self, action, is_mapped: bool = False):
+        if not is_mapped:
+            action = self.map_action(action)
+        action = np.array([action])
         self.env.act(action)  # FIXME
         reward, state, done = self.env.observe()
         reward = reward[0]

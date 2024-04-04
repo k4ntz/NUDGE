@@ -19,9 +19,10 @@ class NudgeEnv(NudgeBaseEnv):
     }
     pred_names: Sequence
 
-    def __init__(self, mode: str):
+    def __init__(self, mode: str, render_mode="rgb_array", render_oc_overlay=False):
         super().__init__(mode)
-        self.env = OCAtari(env_name="ALE/Seaquest-v5", mode="ram", render_mode="rgb_array")
+        self.env = OCAtari(env_name="ALE/Seaquest-v5", mode="ram",
+                           render_mode=render_mode, render_oc_overlay=render_oc_overlay)
         self.n_objects = 43
         self.n_features = 4  # visible, x-pos, y-pos, right-facing
 
@@ -38,8 +39,9 @@ class NudgeEnv(NudgeBaseEnv):
         state = self.env.objects
         return self.convert_state(state)
 
-    def step(self, action):
-        action = self.map_action(action)
+    def step(self, action, is_mapped: bool = False):
+        if not is_mapped:
+            action = self.map_action(action)
         _, reward, done, _, _ = self.env.step(action)
         state = self.env.objects
         return self.convert_state(state), reward, done
