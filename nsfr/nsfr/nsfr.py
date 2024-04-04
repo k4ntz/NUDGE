@@ -13,6 +13,7 @@ class NSFReasoner(nn.Module):
         infer_module (nn.Module): The differentiable forward-chaining inference module.
         atoms (list(atom)): The set of ground atoms (facts).
     """
+
     def __init__(self, facts_converter, infer_module, atoms, bk, clauses, train=False):
         super().__init__()
         self.fc = facts_converter
@@ -22,6 +23,7 @@ class NSFReasoner(nn.Module):
         self.clauses = clauses
         self._train = train
         self.prednames = self.get_prednames()
+        self.V_0 = []
         self.V_T = []
 
     def get_params(self):
@@ -37,26 +39,22 @@ class NSFReasoner(nn.Module):
     def forward(self, x):
         zs = x
         # convert to the valuation tensor
-        V_0 = self.fc(zs, self.atoms, self.bk)
+        self.V_0 = self.fc(zs, self.atoms, self.bk)
         # perform T-step forward-chaining reasoning
-        V_T = self.im(V_0)
-        self.V_T = V_T
-        # self.print_probs(V_T)
+        self.V_T = self.im(self.V_0)
         # only return probs of actions
         actions = self.get_predictions(V_T, prednames=self.prednames)
         return actions
 
     def predict(self, v, predname):
-        """Extracting a value from the valuation tensor using a given predicate.
-        """
+        """Extract a value from the valuation tensor using a given predicate."""
         # v: batch * |atoms|
         target_index = get_index_by_predname(
             pred_str=predname, atoms=self.atoms)
         return v[:, target_index]
 
     def predict_multi(self, v, prednames):
-        """Extracting values from the valuation tensor using given predicates.
-        """
+        """Extract values from the valuation tensor using given predicates."""
         # v: batch * |atoms|
         target_indices = []
         for predname in prednames:
@@ -72,8 +70,7 @@ class NSFReasoner(nn.Module):
         return prob
 
     def print_program(self):
-        """Print asummary of logic programs using continuous weights.
-        """
+        """Print a summary of logic programs using continuous weights."""
         print('====== LEARNED PROGRAM ======')
         C = self.clauses
         # a = self.im.W
@@ -84,24 +81,44 @@ class NSFReasoner(nn.Module):
             print('C_' + str(i) + ': ',
                   C[max_i], 'W_' + str(i) + ':', round(W_[max_i].detach().cpu().item(), 3))
 
-    def print_valuation_batch(self, valuation, n=40):
-        self.print_program()
-        for b in range(valuation.size(0)):
-            print('===== BATCH: ', b, '=====')
-            v = valuation[b].detach().cpu().numpy()
-            idxs = np.argsort(-v)
+    def print_valuations(self, predicate: str = None, min_value: float = 0,
+                         initial_valuation: bool = True):
+        # print('===== VALUATIONS =====')
+        valuation = self.V_0 if initial_valuation else self.V_T
+        for b, batch in enumerate(valuation):
+            # print(f"== BATCH {b} ==")
+            batch = batch.detach().cpu().numpy()
+            idxs = np.argsort(-batch)  # Sort by valuation value
             for i in idxs:
-                if v[i] >= 0:
-                    print(self.atoms[i], ': ', round(v[i], 3))
+                value = batch[i]
+                if value >= min_value:
+                    atom = self.atoms[i]
+                    if predicate is None or predicate == atom.pred.name:
+                        print(f"{value:.3f} {atom}")
+
+    def print_action_predicate_valuations(self, initial_valuation: bool = True):
+        for predicate in self.prednames:
+            self.print_valuation_for_predname(predicate, initial_valuation=initial_valuation)
+
+    def print_valuation_for_predname(self, predname: str, initial_valuation: bool = True):
+        value = self.get_predicate_valuation(predname, initial_valuation)
+        print(f"{predname}:  {value:.3f}")
+
+    def get_predicate_valuation(self, predname: str, initial_valuation: bool = True):
+        valuation = self.V_0 if initial_valuation else self.V_T
+        target_index = get_index_by_predname(pred_str=predname, atoms=self.atoms)
+        value = valuation[:, target_index].item()
+        return value
 
     def print_explaining(self, predicts):
         predicts = predicts.detach().cpu().numpy()
         index = np.argmax(predicts[0])
         return self.prednames[index]
 
-    def print_probs(self, V_T):
-        for i, atom in enumerate(self.atoms):
-            print(V_T[0][i], atom)
+    def print_probs(self):
+        probs = self.get_probs()
+        for atom, p in probs.items():
+            print(f"{p:.3f} {atom}")
 
     def get_probs(self):
         probs = {}
