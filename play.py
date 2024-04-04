@@ -1,36 +1,14 @@
 import argparse
-import torch
 import os
 
 from env_src.render_atari import render_atari
 from env_src.procgen.render import render_loot, render_ecoinrun, render_threefish
 from env_src.getout.getout.render import render_getout
-from nudge.agents.neural_agent import ActorCritic, NeuralPlayer
-from nudge.agents.logic_agent import NsfrActorCritic, LogicPlayer
+from nudge.agents.neural_agent import NeuralPlayer
+from nudge.agents.logic_agent import LogicPlayer
 from nudge.agents.random_agent import RandomPlayer
 from nudge.utils import make_deterministic
-
-device = torch.device('cuda:0')
-
-
-def load_model(model_path, args, set_eval=True):
-    print("Loading")
-    with open(model_path, "rb") as f:
-        if args.alg == 'ppo':
-            model = ActorCritic(args).to(device)
-        elif args.alg == 'logic':
-            model = NsfrActorCritic(args, device=device).to(device)
-        model.load_state_dict(state_dict=torch.load(f))
-        if args.alg == 'logic':
-            model.actor.print_program()
-
-    model = model.actor
-    model.as_dict = True
-
-    if set_eval:
-        model = model.eval()
-
-    return model
+from utils import load_model
 
 
 def main():
@@ -84,7 +62,7 @@ def main():
             model_name = input('Enter file name: ')
         # model_file = os.path.join(models_folder, model_name)
         model_file = os.path.join(current_path, 'models', args.m, args.alg, model_name)
-        model = load_model(model_file, args)
+        model = load_model(model_file)
     else:
         model = None
 

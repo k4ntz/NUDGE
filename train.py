@@ -2,33 +2,26 @@ import csv
 import os
 import sys
 import time
+from datetime import datetime
+from inspect import signature
 from pathlib import Path
 from typing import Callable
-import math
-from inspect import signature
-
-from torch.optim import Optimizer, Adam
-import yaml
 
 import numpy as np
-
+import yaml
 from rtpt import RTPT
+from torch.optim import Optimizer, Adam
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from nudge.agents.logic_agent import LogicPPO
 from nudge.agents.neural_agent import NeuralPPO
-from nudge.utils import make_deterministic, save_hyperparams
 from nudge.env import NudgeBaseEnv
-from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
+from nudge.utils import make_deterministic, save_hyperparams
+from utils import exp_decay
 
 OUT_PATH = Path("out/")
 IN_PATH = Path("in/")
-
-
-def exp_decay(episode: int):
-    """Reaches 2% after about 850 episodes."""
-    return max(math.exp(-episode / 500), 0.02)
 
 
 def main(algorithm: str,
@@ -188,7 +181,7 @@ def main(algorithm: str,
                     weights_list.append([(agent.get_weights().tolist())])
 
             # save model weights
-            if time_step % save_steps == 0:
+            if time_step % save_steps == 1:
                 checkpoint_path = checkpoint_dir / f"step_{time_step}.pth"
                 if algorithm == 'logic':
                     agent.save(checkpoint_path, checkpoint_dir, step_list, reward_list, weights_list)

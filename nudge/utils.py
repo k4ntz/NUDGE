@@ -1,7 +1,15 @@
+import math
 import random
 import numpy as np
 import torch
 import yaml
+from pathlib import Path
+import os
+import re
+
+from agents.logic_agent import NsfrActorCritic
+from agents.neural_agent import ActorCritic
+from nudge.env import NudgeBaseEnv
 
 
 def save_hyperparams(signature, local_scope, save_path, print_summary: bool = False):
@@ -41,3 +49,63 @@ def simulate_prob(extracted_states, num_of_objs, key_picked):
     if key_picked:
         extracted_states[:, 1] = 0
     return extracted_states
+
+
+def load_model(model_dir,
+               env_kwargs_override: dict = None,
+               device=torch.device('cuda:0')):
+    # Determine all relevant paths
+    model_dir = Path(model_dir)
+    config_path = model_dir / "config.yaml"
+    checkpoint_dir = model_dir / "checkpoints"
+    most_recent_step = get_most_recent_checkpoint_step(checkpoint_dir)
+    checkpoint_path = checkpoint_dir / f"step_{most_recent_step}.pth"
+
+    # Load model's configuration
+    with open(config_path, "r") as f:
+        config = yaml.load(f, Loader=yaml.Loader)
+
+    algorithm = config["algorithm"]
+    environment = config["environment"]
+    env_kwargs = config["env_kwargs"]
+    env_kwargs.update(env_kwargs_override)
+
+    # Setup the environment
+    env = NudgeBaseEnv.from_name(environment, mode=algorithm, **env_kwargs)
+
+    rules = config["rules"]
+
+    print("Loading...")
+    # Initialize the model
+    if algorithm == 'ppo':
+        model = ActorCritic(env).to(device)
+    else:  # algorithm == 'logic'
+        model = NsfrActorCritic(env, device=device, rules=rules).to(device)
+
+    # Load the model weights
+    with open(checkpoint_path, "rb") as f:
+        model.load_state_dict(state_dict=torch.load(f))
+
+    return model
+
+
+def yellow(text):
+    return "\033[93m" + text + "\033[0m"
+
+
+def exp_decay(episode: int):
+    """Reaches 2% after about 850 episodes."""
+    return max(math.exp(-episode / 500), 0.02)
+
+
+def get_most_recent_checkpoint_step(checkpoint_dir: str | Path) -> int | None:
+    checkpoints = os.listdir(checkpoint_dir)
+    highest_step = 0
+    pattern = re.compile("[0-9]+")
+    for i, c in enumerate(checkpoints):
+        match = pattern.search(c)
+        if match is not None:
+            step = int(match.group())
+            if step > highest_step:
+                highest_step = step
+    return highest_step
