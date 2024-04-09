@@ -106,7 +106,7 @@ class Renderer:
 
                 if self.reset:
                     done = True
-                    new_obs = self.env.reset()
+                    new_obs, _ = self.env.reset()
                     self._render()
 
                 obs = new_obs
