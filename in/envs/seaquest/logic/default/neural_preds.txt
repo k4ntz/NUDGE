@@ -18,7 +18,3 @@ same_depth_enemy:2:oplayer,oenemy
 same_depth_diver:2:oplayer,odiver
 same_depth_missile:2:oplayer,omissile
 oxygen_low:1:ooxygenbar
-test_predicate_global:1:image
-test_predicate_object:1:oplayer
-true_predicate:1:oplayer
-false_predicate:1:oplayer

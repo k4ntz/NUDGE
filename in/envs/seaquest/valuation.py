@@ -1,3 +1,4 @@
+import numpy as np
 import torch as th
 
 from nsfr.utils.common import bool_to_probs
@@ -75,30 +76,24 @@ def higher_than_diver(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
 
 
 def close_by_missile(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
-    player_x = player[..., 1]
-    player_y = player[..., 2]
-    obj_x = obj[..., 1]
-    obj_y = obj[..., 2]
-    result = (abs(player_x - obj_x) < 32) & (abs(player_y - obj_y) < 32)
-    return bool_to_probs(result)
+    return _close_by(player, obj)
 
 
 def close_by_enemy(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
-    player_x = player[..., 1]
-    player_y = player[..., 2]
-    obj_x = obj[..., 1]
-    obj_y = obj[..., 2]
-    result = (abs(player_x - obj_x) < 32) & (abs(player_y - obj_y) < 32)
-    return bool_to_probs(result)
+    return _close_by(player, obj)
 
 
 def close_by_diver(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
+    return _close_by(player, obj)
+
+
+def _close_by(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
     player_x = player[..., 1]
     player_y = player[..., 2]
     obj_x = obj[..., 1]
     obj_y = obj[..., 2]
-    result = (abs(player_x - obj_x) < 32) & (abs(player_y - obj_y) < 32)
-    return bool_to_probs(result)
+    result = np.clip((64 - abs(player_x - obj_x) - abs(player_y - obj_y)) / 64, 0, 1)
+    return result
 
 
 def left_of_enemy(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
@@ -133,21 +128,3 @@ def oxygen_low(oxygen_bar: th.Tensor) -> th.Tensor:
     """True iff oxygen bar is below 16/64."""
     result = oxygen_bar[..., 1] < 16
     return bool_to_probs(result)
-
-
-def test_predicate_global(global_state: th.Tensor) -> th.Tensor:
-    result = global_state[..., 0, 2] < 100
-    return bool_to_probs(result)
-
-
-def test_predicate_object(agent: th.Tensor) -> th.Tensor:
-    result = agent[..., 2] < 100
-    return bool_to_probs(result)
-
-
-def true_predicate(agent: th.Tensor) -> th.Tensor:
-    return bool_to_probs(th.tensor([True]))
-
-
-def false_predicate(agent: th.Tensor) -> th.Tensor:
-    return bool_to_probs(th.tensor([False]))

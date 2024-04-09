@@ -12,7 +12,3 @@ left_to_diver:1:image
 right_to_diver:1:image
 up_to_diver:1:image
 down_to_diver:1:image
-down_test_global:1:image
-down_test_object:1:image
-down_true:1:image
-down_false:1:image
