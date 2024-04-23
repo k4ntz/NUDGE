@@ -1,4 +1,3 @@
-import numpy as np
 import torch as th
 
 from nsfr.utils.common import bool_to_probs
@@ -92,7 +91,7 @@ def _close_by(player: th.Tensor, obj: th.Tensor) -> th.Tensor:
     player_y = player[..., 2]
     obj_x = obj[..., 1]
     obj_y = obj[..., 2]
-    result = np.clip((64 - abs(player_x - obj_x) - abs(player_y - obj_y)) / 64, 0, 1)
+    result = th.clip((64 - abs(player_x - obj_x) - abs(player_y - obj_y)) / 64, 0, 1)
     return result
 
 

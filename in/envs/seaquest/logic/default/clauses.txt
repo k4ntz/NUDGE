@@ -1,4 +1,3 @@
-noop(X):-.
 up_air(X):-oxygen_low(B).
 fire_left(X):-same_depth_enemy(P,E),visible_enemy(E),facing_left(P),right_of_enemy(P,E).
 fire_right(X):-same_depth_enemy(P,E),visible_enemy(E),facing_right(P),left_of_enemy(P,E).
