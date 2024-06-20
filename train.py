@@ -18,7 +18,7 @@ from nudge.agents.logic_agent import LogicPPO
 from nudge.agents.neural_agent import NeuralPPO
 from nudge.env import NudgeBaseEnv
 from nudge.utils import make_deterministic, save_hyperparams
-from utils import exp_decay
+from nudge.utils import exp_decay
 
 OUT_PATH = Path("out/")
 IN_PATH = Path("in/")

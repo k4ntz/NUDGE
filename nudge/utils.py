@@ -98,7 +98,7 @@ def exp_decay(episode: int):
     return max(math.exp(-episode / 500), 0.02)
 
 
-def get_most_recent_checkpoint_step(checkpoint_dir: str | Path) -> int | None:
+def get_most_recent_checkpoint_step(checkpoint_dir):
     checkpoints = os.listdir(checkpoint_dir)
     highest_step = 0
     pattern = re.compile("[0-9]+")
