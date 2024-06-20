@@ -4,6 +4,7 @@ from typing import Sequence
 from nudge.env import NudgeBaseEnv
 import numpy as np
 import gymnasium
+import gym3
 from gymnasium.envs.registration import register
 from nudge.utils import simulate_prob
 import torch
@@ -27,9 +28,11 @@ class NudgeEnv(NudgeBaseEnv):
         register(id="getout",
                  entry_point="env_src.getout.getout.getout:Getout")
         self.env = gymnasium.make("getout")  # FIXME
+        # self.env = gym3.make("getout")  # FIXME
 
     def reset(self):
         state = self.env.reset()
+        import ipdb; ipdb.set_trace()
         return self.convert_state(state)
 
     def step(self, action, is_mapped: bool = False):

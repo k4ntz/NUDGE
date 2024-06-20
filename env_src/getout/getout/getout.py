@@ -15,7 +15,7 @@ class Getout:
     def __init__(self, render=True, resource_path=None, start_on_first_action=False, width=50):
         self.unwrapped = self
         self.action_space = Discrete(5)
-        self.observation_space = ...  # TODO
+        self.observation_space = Discrete(8)  # TODO
         self.zoom = 42 - width//2
 
         if resource_path is None:
@@ -86,3 +86,9 @@ class Getout:
 
     def get_score(self):
         return self.score
+
+    def reset(self):
+        import ipdb; ipdb.set_trace()
+        self.step_counter = 0
+        return [0 for _ in range(8)]
+

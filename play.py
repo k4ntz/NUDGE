@@ -8,7 +8,7 @@ from nudge.agents.neural_agent import NeuralPlayer
 from nudge.agents.logic_agent import LogicPlayer
 from nudge.agents.random_agent import RandomPlayer
 from nudge.utils import make_deterministic
-from utils import load_model
+from nudge.utils import load_model
 
 
 def main():
