@@ -7,8 +7,8 @@ from pathlib import Path
 import os
 import re
 
-from agents.logic_agent import NsfrActorCritic
-from agents.neural_agent import ActorCritic
+from .agents.logic_agent import NsfrActorCritic
+from .agents.neural_agent import ActorCritic
 from nudge.env import NudgeBaseEnv
 
 

@@ -5,9 +5,9 @@ import numpy as np
 import torch as th
 import pygame
 
-from agents.logic_agent import NsfrActorCritic
-from agents.neural_agent import ActorCritic
-from utils import load_model, yellow
+from .agents.logic_agent import NsfrActorCritic
+from .agents.neural_agent import ActorCritic
+from .utils import load_model, yellow
 
 SCREENSHOTS_BASE_PATH = "out/screenshots/"
 PREDICATE_PROBS_COL_WIDTH = 300
