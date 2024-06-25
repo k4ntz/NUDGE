@@ -19,6 +19,8 @@ from nudge.agents.neural_agent import NeuralPPO
 from nudge.env import NudgeBaseEnv
 from nudge.utils import make_deterministic, save_hyperparams
 from nudge.utils import exp_decay
+from argparse import ArgumentParser
+
 
 OUT_PATH = Path("out/")
 IN_PATH = Path("in/")
@@ -220,12 +222,21 @@ def main(algorithm: str,
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        config_path = sys.argv[1]
-    else:
+    parser = ArgumentParser()
+    parser.add_argument("-c", "--config", type=str, default=None)
+    parser.add_argument("-g", "--game", type=str, default=None)
+    
+    args = parser.parse_args()
+    
+    if args.config is None:
         config_path = IN_PATH / "config" / "default.yaml"
+    else:
+        config_path = Path(args.config)
 
     with open(config_path, "r") as f:
         config = yaml.load(f, Loader=yaml.Loader)
+    
+    if args.game is not None:
+        config["environment"] = args.game
 
     main(**config)

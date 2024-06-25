@@ -1,13 +1,13 @@
 import numpy as np
-from ocatari import OCAtari
-
+# from ocatari import OCAtari
+from hackatari import HackAtari
 
 def render_atari(agent, args):
     # gamename =
     rdr_mode = "human" if args.render else "rgb_array"
-    env = OCAtari(env_name=args.env.capitalize(), render_mode=rdr_mode, mode="revised")
+    env = HackAtari(env_name=args.env.capitalize(), render_mode=rdr_mode, mode="revised")
+    # env = OCAtari(env_name=args.env.capitalize(), render_mode=rdr_mode, mode="revised")
     obs = env.reset()
-    # from pprint import pprint
     try:
         agent.nb_actions = env.nb_actions
     except:

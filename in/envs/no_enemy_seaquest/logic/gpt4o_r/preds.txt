@@ -1,0 +1,14 @@
+noop:1:image
+up_air:1:image
+fire_left:1:image
+fire_right:1:image
+left_aim:1:image
+right_aim:1:image
+up_aim:1:image
+down_aim:1:image
+up_evade:1:image
+down_evade:1:image
+left_to_diver:1:image
+right_to_diver:1:image
+up_to_diver:1:image
+down_to_diver:1:image

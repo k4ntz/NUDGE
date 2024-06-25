@@ -1,0 +1,15 @@
+up_air(X):-oxygen_low(B).
+fire_left(X):-same_depth_enemy(P,E),visible_enemy(E),facing_left(P),right_of_enemy(P,E).
+fire_right(X):-same_depth_enemy(P,E),visible_enemy(E),facing_right(P),left_of_enemy(P,E).
+left_aim(X):-right_of_enemy(P,E),facing_right(P),same_depth_enemy(P,E),visible_enemy(E).
+right_aim(X):-left_of_enemy(P,E),facing_left(P),same_depth_enemy(P,E),visible_enemy(E).
+down_aim(X):-higher_than_enemy(P,E),visible_enemy(E).
+up_aim(X):-deeper_than_enemy(P,E),visible_enemy(E).
+up_evade(X):-close_by_enemy(P,E),same_depth_enemy(P,E),visible_enemy(E).
+down_evade(X):-close_by_enemy(P,E),same_depth_enemy(P,E),visible_enemy(E).
+up_evade(X):-close_by_missile(P,M),same_depth_missile(P,M),visible_missile(M).
+down_evade(X):-close_by_missile(P,M),same_depth_missile(P,M),visible_missile(M).
+left_to_diver(X):-right_of_diver(P,D),close_by_diver(P,D),visible_diver(D).
+right_to_diver(X):-left_of_diver(P,D),close_by_diver(P,D),visible_diver(D).
+up_to_diver(X):-deeper_than_diver(P,D),close_by_diver(P,D),visible_diver(D).
+down_to_diver(X):-higher_than_diver(P,D),close_by_diver(P,D),visible_diver(D).

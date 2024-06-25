@@ -20,10 +20,10 @@ class NudgeEnv(NudgeBaseEnv):
     }
     pred_names: Sequence
 
-    def __init__(self, mode: str, render_mode="rgb_array", render_oc_overlay=False):
+    def __init__(self, mode: str, render_mode="human", render_oc_overlay=False):
         super().__init__(mode)
-        self.env = HackAtari(env_name="ALE/Seaquest-v5", mode="ram",
-                           render_mode=render_mode, render_oc_overlay=render_oc_overlay)
+        self.env = HackAtari(env_name="ALE/Seaquest-v5", mode="ram", modifs=[("disable_enemies")],
+                            render_mode=render_mode, render_oc_overlay=render_oc_overlay)
         self.n_objects = 43
         self.n_features = 4  # visible, x-pos, y-pos, right-facing
 
