@@ -93,12 +93,13 @@ class Renderer:
                 action = self._get_action()
                 self.model.act(th.unsqueeze(obs, 0))  # update the model's internals
             else:  # AI plays the game
-                action, _ = self.model.act(th.unsqueeze(obs, 0))
+                action, _ = self.model.act(th.unsqueeze(th.tensor(obs), 0))
                 action = self.predicates[action.item()]
 
             (new_obs, _), reward, done = self.env.step(action, is_mapped=self.takeover)
 
             self._render()
+            ret += reward
 
             if not self.paused:
                 if self.takeover and float(reward) != 0:
@@ -116,6 +117,7 @@ class Renderer:
                     print(f"Return: {ret} - Length {length}")
                     ret = 0
                     length = 0
+                    self.env.reset()
 
         pygame.quit()
 

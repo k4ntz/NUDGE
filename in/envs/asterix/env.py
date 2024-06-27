@@ -29,7 +29,8 @@ class NudgeEnv(NudgeBaseEnv):
     def step(self, action, is_mapped: bool = False):
         if not is_mapped:
             action = self.map_action(action)
-        _, reward, done, _, _ = self.env.step(action)
+        _, reward, terminated, truncated, _ = self.env.step(action)
+        done = terminated or truncated
         state = self.env.objects
         return self.convert_state(state), reward, done
 
