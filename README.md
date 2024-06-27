@@ -12,6 +12,12 @@ This is the implementation of **Neurally gUided Differentiable loGic policiEs (N
 2. On project level, simply run `python train.py` to start a new training run.
 
 ## How to Use
+
+### Training
+To train a new agent, run `python train.py`. The training process is controlled by the hyperparameters specified in `in/config/default.yaml`. You can specify a different configuration by providing the corresponding YAML file path as an argument, e.g., `python train.py -c in/config/my_config.yaml`. The -c argument is optional and defaults to `in/config/default.yaml`.
+You can also overwrite the game environment by providing the `-g` argument, e.g., `python train.py -g freeway`.
+
+
 ### Hyperparameters
 The hyperparameters are configured inside `in/config/default.yaml` which is loaded as default. You can specify a different configuration by providing the corresponding YAML file path as an argument, e.g., `python train.py in/config/my_config.yaml`. A description of all hyperparameters can be found in `train.py`.
 
@@ -36,12 +42,9 @@ apt-get install qt5-default
 ```
 
 ### Playing
-TODO
-
-**Example to play with a trained ppo agent**
 
 ```
-python3 play.py -s 0 -alg ppo -m getout -env getout  
+python3 play_gui.py -g seaquest
 ```
 
 

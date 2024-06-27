@@ -22,7 +22,7 @@ if __name__ == "__main__":
     agent_path = args.agent_path.replace("game", args.game)
     trained_checkpoint = find_latest_trained_checkpoint(agent_path)
     renderer = Renderer(agent_path=trained_checkpoint,
-                        fps=15,
+                        fps=50,
                         deterministic=False,
                         env_kwargs=dict(render_oc_overlay=True),
                         render_predicate_probs=True)

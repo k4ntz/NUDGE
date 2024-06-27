@@ -49,7 +49,7 @@ class Renderer:
         except Exception:
             print(yellow("Info: No key-to-action mapping found for this env. No manual user control possible."))
             self.action_meanings = None
-            self.keys2actions = None
+            self.keys2actions = {}
         self.current_keys_down = set()
 
         self.nsfr_reasoner = self.model.actor
