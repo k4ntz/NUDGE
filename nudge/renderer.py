@@ -67,7 +67,7 @@ class Renderer:
     def _init_pygame(self):
         pygame.init()
         pygame.display.set_caption("Environment")
-        frame = self.env.env.render().swapaxes(0, 1)
+        frame = self.env.env.render()
         self.env_render_shape = frame.shape[:2]
         window_shape = list(self.env_render_shape)
         if self.render_predicate_probs:
@@ -175,7 +175,7 @@ class Renderer:
             self.clock.tick(self.fps)
 
     def _render_env(self):
-        frame = self.env.env.render().swapaxes(0, 1)
+        frame = self.env.env.render()
         frame_surface = pygame.Surface(self.env_render_shape)
         pygame.pixelcopy.array_to_surface(frame_surface, frame)
         self.window.blit(frame_surface, (0, 0))
