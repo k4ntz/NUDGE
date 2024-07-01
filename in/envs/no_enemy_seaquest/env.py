@@ -9,7 +9,7 @@ from hackatari import HackAtari
 
 
 class NudgeEnv(NudgeBaseEnv):
-    name = "seaquest"
+    name = "no_enemy_seaquest"
     pred2action = {
         'noop': 0,
         'fire': 1,

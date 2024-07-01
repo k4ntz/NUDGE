@@ -225,6 +225,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-c", "--config", type=str, default=None)
     parser.add_argument("-g", "--game", type=str, default=None)
+    parser.add_argument("-d", "--device", type=str, default=None)
     
     args = parser.parse_args()
     
@@ -238,5 +239,8 @@ if __name__ == "__main__":
     
     if args.game is not None:
         config["environment"] = args.game
+    if args.device is not None:
+        config["device"] = args.device
+        
 
     main(**config)
