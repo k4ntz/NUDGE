@@ -114,7 +114,10 @@ def get_most_recent_checkpoint_step(checkpoint_dir):
 
 def print_program(agent, mode="softor"):
     """Print a summary of logic programs using continuous weights."""
-    nsfr_actor = agent.actor
+    try:
+        nsfr_actor = agent.actor
+    except AttributeError:
+        nsfr_actor = agent.policy.actor
     if mode == "argmax":
         C = nsfr_actor.clauses
         Ws_softmaxed = torch.softmax(nsfr_actor.im.W, 1)
