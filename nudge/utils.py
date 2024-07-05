@@ -114,16 +114,16 @@ def get_most_recent_checkpoint_step(checkpoint_dir):
 
 def print_program(agent, mode="softor"):
     """Print a summary of logic programs using continuous weights."""
-    nsfr = agent.actor
+    nsfr_actor = agent.actor
     if mode == "argmax":
-        C = nsfr.clauses
-        Ws_softmaxed = torch.softmax(nsfr.im.W, 1)
+        C = nsfr_actor.clauses
+        Ws_softmaxed = torch.softmax(nsfr_actor.im.W, 1)
         for i, W_ in enumerate(Ws_softmaxed):
             max_i = np.argmax(W_.detach().cpu().numpy())
             print('C_' + str(i) + ': ',
                   C[max_i], 'W_' + str(i) + ':', round(W_[max_i].detach().cpu().item(), 3))
     elif mode == "softor":
-        W_softmaxed = torch.softmax(nsfr.im.W, 1)
+        W_softmaxed = torch.softmax(nsfr_actor.im.W, 1)
         w = softor(W_softmaxed, dim=0)
-        for i, c in enumerate(nsfr.clauses):
-            print('C_' + str(i) + ': ', np.round(w[i].detach().cpu().item(), 2), nsfr.clauses[i])
+        for i, c in enumerate(nsfr_actor.clauses):
+            print('C_' + str(i) + ': ', np.round(w[i].detach().cpu().item(), 2), nsfr_actor.clauses[i])
