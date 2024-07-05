@@ -19,7 +19,9 @@ from nudge.agents.neural_agent import NeuralPPO
 from nudge.env import NudgeBaseEnv
 from nudge.utils import make_deterministic, save_hyperparams
 from nudge.utils import exp_decay
+from nudge.utils import print_program
 from argparse import ArgumentParser
+
 
 
 OUT_PATH = Path("out/")
@@ -109,10 +111,11 @@ def main(algorithm: str,
     else:  # logic
         agent = LogicPPO(env, rules, lr_actor, lr_critic, optimizer,
                          gamma, epochs, eps_clip, device)
-        print('Candidate Clauses:')
-        for clause in agent.policy.actor.clauses:
-            print(clause)
-        print()
+        print_program(agent)
+        # print('Candidate Clauses:')
+        # for clause in agent.policy.actor.clauses:
+        #     print(clause)
+        # print()
 
     i_episode = 0
     weights_list = []

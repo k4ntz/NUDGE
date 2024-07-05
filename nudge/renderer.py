@@ -7,7 +7,7 @@ import pygame
 
 from .agents.logic_agent import NsfrActorCritic
 from .agents.neural_agent import ActorCritic
-from .utils import load_model, yellow
+from .utils import load_model, yellow, print_program
 
 from ocatari.core import OCAtari
 from hackatari.core import HackAtari
@@ -60,7 +60,8 @@ class Renderer:
         self.current_keys_down = set()
 
         self.nsfr_reasoner = self.model.actor
-        self.nsfr_reasoner.print_program()
+        # self.nsfr_reasoner.print_program()
+        print_program(self.model)
         self.predicates = self.nsfr_reasoner.prednames
 
         self._init_pygame()

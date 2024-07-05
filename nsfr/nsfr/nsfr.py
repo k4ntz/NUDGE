@@ -2,7 +2,7 @@ import numpy as np
 import torch.nn as nn
 import torch
 from nsfr.utils.logic import get_index_by_predname
-
+from nsfr.utils.torch import softor
 
 class NSFReasoner(nn.Module):
     """The Neuro-Symbolic Forward Reasoner.
@@ -69,20 +69,20 @@ class NSFReasoner(nn.Module):
             1) == N, 'Invalid shape in the prediction.'
         return prob
 
-    def print_program(self):
-        """Print a summary of logic programs using continuous weights."""
-        print('====== LEARNED PROGRAM ======')
-        C = self.clauses
-        # a = self.im.W
-        self.im.W.requires_grad = False
-        for i in range(len(self.im.W[0])):
-            self.im.W[0][i] = 10000
-        Ws_softmaxed = torch.softmax(self.im.W, 1)
-
-        for i, W_ in enumerate(Ws_softmaxed):
-            max_i = np.argmax(W_.detach().cpu().numpy())
-            print('C_' + str(i) + ': ',
-                  C[i], 'W_' + str(i) + ':', round(W_[max_i].detach().cpu().item(), 3))
+zsh:1: command not found: q
+#        """Print a summary of logic programs using continuous weights."""
+#        print('====== LEARNED PROGRAM ======')
+#        C = self.clauses
+#        # a = self.im.W
+#        self.im.W.requires_grad = False
+#        for i in range(len(self.im.W[0])):
+#            self.im.W[0][i] = 10000
+#        Ws_softmaxed = torch.softmax(self.im.W, 1)
+#
+#        for i, W_ in enumerate(Ws_softmaxed):
+#            max_i = np.argmax(W_.detach().cpu().numpy())
+#            print('C_' + str(i) + ': ',
+#                  C[i], 'W_' + str(i) + ':', round(W_[max_i].detach().cpu().item(), 3))
 
     def print_valuations(self, predicate: str = None, min_value: float = 0,
                          initial_valuation: bool = True):
