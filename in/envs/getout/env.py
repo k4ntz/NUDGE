@@ -32,7 +32,6 @@ class NudgeEnv(NudgeBaseEnv):
 
     def reset(self):
         state = self.env.reset()
-        import ipdb; ipdb.set_trace()
         return self.convert_state(state)
 
     def step(self, action, is_mapped: bool = False):

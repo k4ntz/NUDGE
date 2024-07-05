@@ -9,11 +9,15 @@ from .agents.logic_agent import NsfrActorCritic
 from .agents.neural_agent import ActorCritic
 from .utils import load_model, yellow
 
+from ocatari.core import OCAtari
+from hackatari.core import HackAtari
+
+
 SCREENSHOTS_BASE_PATH = "out/screenshots/"
 PREDICATE_PROBS_COL_WIDTH = 300
 CELL_BACKGROUND_DEFAULT = np.array([40, 40, 40])
 CELL_BACKGROUND_HIGHLIGHT = np.array([40, 150, 255])
-
+CELL_BACKGROUND_SELECTED = np.array([80, 80, 80])
 
 class Renderer:
     model: Union[NsfrActorCritic, ActorCritic]
@@ -45,7 +49,10 @@ class Renderer:
 
         try:
             self.action_meanings = self.env.env.get_action_meanings()
-            self.keys2actions = self.env.env.get_keys_to_action()
+            ocenv = self.env.env
+            if isinstance(ocenv, HackAtari):
+                ocenv = ocenv.env
+            self.keys2actions = ocenv.get_keys_to_action()
         except Exception:
             print(yellow("Info: No key-to-action mapping found for this env. No manual user control possible."))
             self.action_meanings = None
@@ -96,12 +103,12 @@ class Renderer:
                 action, _ = self.model.act(th.unsqueeze(th.tensor(obs), 0))
                 action = self.predicates[action.item()]
 
-            (new_obs, _), reward, done = self.env.step(action, is_mapped=self.takeover)
-
-            self._render()
-            ret += reward
-
             if not self.paused:
+                (new_obs, _), reward, done = self.env.step(action, is_mapped=self.takeover)
+
+                self._render()
+                ret += reward
+
                 if self.takeover and float(reward) != 0:
                     print(f"Reward {reward:.2f}")
 
@@ -146,9 +153,13 @@ class Renderer:
                     self.reset = True
 
                 elif event.key == pygame.K_f:  # 'F': fast forward
-                    self.fast_forward = True
+                    self.fast_forward = not(self.fast_forward)
 
                 elif event.key == pygame.K_t:  # 'T': trigger takeover
+                    if self.takeover:
+                        print("AI takeover")
+                    else:
+                        print("Human takeover")
                     self.takeover = not self.takeover
 
                 elif event.key == pygame.K_c:  # 'C': capture screenshot
@@ -162,8 +173,8 @@ class Renderer:
                 if (event.key,) in self.keys2actions.keys():
                     self.current_keys_down.remove(event.key)
 
-                elif event.key == pygame.K_f:  # 'F': fast forward
-                    self.fast_forward = False
+                # elif event.key == pygame.K_f:  # 'F': fast forward
+                #     self.fast_forward = False
 
     def _render(self):
         self.window.fill((20, 20, 20))  # clear the entire window
@@ -187,9 +198,13 @@ class Renderer:
 
         nsfr = self.nsfr_reasoner
         pred_vals = {pred: nsfr.get_predicate_valuation(pred, initial_valuation=False) for pred in nsfr.prednames}
+        i_max = np.argmax(list(pred_vals.values()))
         for i, (pred, val) in enumerate(pred_vals.items()):
             # Render cell background
-            color = val * CELL_BACKGROUND_HIGHLIGHT + (1 - val) * CELL_BACKGROUND_DEFAULT
+            if i == i_max:
+                color = CELL_BACKGROUND_SELECTED
+            else:
+                color = val * CELL_BACKGROUND_HIGHLIGHT + (1 - val) * CELL_BACKGROUND_DEFAULT
             pygame.draw.rect(self.window, color, [
                 anchor[0] - 2,
                 anchor[1] - 2 + i * 35,
@@ -197,7 +212,7 @@ class Renderer:
                 28
             ])
 
-            text = self.font.render(str(f"{val:.3f} - {pred}"), True, "white", None)
+            text = self.font.render(str(f"{100*val:.2f} - {pred}"), True, "white", None)
             text_rect = text.get_rect()
             text_rect.topleft = (self.env_render_shape[0] + 10, 25 + i * 35)
             self.window.blit(text, text_rect)

@@ -236,11 +236,11 @@ if __name__ == "__main__":
 
     with open(config_path, "r") as f:
         config = yaml.load(f, Loader=yaml.Loader)
+        
     
     if args.game is not None:
         config["environment"] = args.game
     if args.device is not None:
         config["device"] = args.device
-        
 
     main(**config)

@@ -6,6 +6,7 @@ from pathlib import Path
 parser = ArgumentParser()
 parser.add_argument("-g", "--game", type=str, default="seaquest")
 parser.add_argument("-a", "--agent_path", type=str, default="out/runs/game/logic/")
+parser.add_argument("-np", "--no_predicates", action="store_true")
 
 def find_latest_trained_checkpoint(agent_path):
     agent_path = Path(agent_path)
@@ -25,5 +26,5 @@ if __name__ == "__main__":
                         fps=100,
                         deterministic=False,
                         env_kwargs=dict(render_oc_overlay=True),
-                        render_predicate_probs=True)
+                        render_predicate_probs=not(args.no_predicates))
     renderer.run()
