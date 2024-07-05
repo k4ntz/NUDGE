@@ -69,7 +69,6 @@ class NSFReasoner(nn.Module):
             1) == N, 'Invalid shape in the prediction.'
         return prob
 
-zsh:1: command not found: q
 #        """Print a summary of logic programs using continuous weights."""
 #        print('====== LEARNED PROGRAM ======')
 #        C = self.clauses
