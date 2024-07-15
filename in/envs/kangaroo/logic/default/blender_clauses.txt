@@ -1,0 +1,3 @@
+neural_agent(X):-close_by_fruit(P,F).
+logic_agent(X):-.
+logic_agent(X):-on_ladder(P,L).

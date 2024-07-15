@@ -1,0 +1,7 @@
+on_ladder:2:oplayer,oladder
+right_of_ladder:2:oplayer,oladder
+left_of_ladder:2:oplayer,oladder
+false_predicate:1:oplayer
+on_pl_ladder:2:oladder,oplatform
+on_pl_player:2:oplayer,oplatform
+close_by_fruit:2:oplayer,ofruit
