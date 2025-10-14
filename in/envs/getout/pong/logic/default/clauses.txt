@@ -1,0 +1,11 @@
+noop(X):-.
+up_dodge_left(X):-on_left(O2,O1),type(O1,player),type(O2,enemy),same_row(02,01),closeby(O2,01),at_bottom(01),on_odd(O2).
+up_dodge_right(X):-on_right(O2,O1),type(O1,player),type(O2,enemy),same_row(02,01),closeby(O2,01),at_bottom(01),on_even(O2).
+down_dodge_left(X):-on_left(O2,O1),type(O1,player),type(O2,enemy),same_row(02,01),closeby(O2,01),at_top(01),on_odd(O2).
+down_dodge_right(X):-on_right(O2,O1),type(O1,player),type(O2,enemy),same_row(02,01),closeby(O2,01),at_top(01),on_even(O2).
+up_bonus_left(X):-on_left(O2,O1),type(O1,player),type(O2,bonus),above_row(02,01),closeby(O2,01).
+up_bonus_right(X):-on_right(O2,O1),type(O1,player),type(O2,bonus),above_row(02,01),closeby(O2,01).
+down_bonus_left(X):-on_left(O2,O1),type(O1,player),type(O2,bonus),below_row(02,01),closeby(O2,01).
+down_bonus_right(X):-on_right(O2,O1),type(O1,player),type(O2,bonus),below_row(02,01),closeby(O2,01).
+right_bonus(X):-on_right(O2,O1),type(O1,player),type(O2,bonus),same_row(02,01).
+left_bonus(X):-on_left(O2,O1),type(O1,player),type(O2,bonus),same_row(02,01).

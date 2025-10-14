@@ -1,0 +1,3 @@
+type:2:object,type
+player_goleft:2:oplayer,oball
+player_goright:2:oplayer,oball

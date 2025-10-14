@@ -1,0 +1,4 @@
+right:1:image
+left:1:image
+noop:1:image
+noop_faraway:1:image

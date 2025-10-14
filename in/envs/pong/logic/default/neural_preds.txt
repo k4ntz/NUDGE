@@ -1,0 +1,5 @@
+player_higher_than_ball:2:oplayer,oball
+player_lower_than_ball:2:oplayer,oball
+ball_closeto_player:2:oplayer,oball
+ball_goto_enemy:1:oball
+ball_comingto_player:1:oball

@@ -1,0 +1,5 @@
+left(X):-player_goleft(P,BS).
+right(X):-player_goright(P,BS).
+up(X):-player_goup(P,B).
+down(X):-player_godown(P,B).
+fire(X):-ball_closeto_player(P,BS).

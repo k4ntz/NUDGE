@@ -6,3 +6,6 @@ same_row:2:ocar,oagent
 above_row:2:ocar,oagent
 top5car:1:ocar
 bottom5car:1:ocar
+no_car_ahead:2:ocar,oagent
+clear_next_cell:2:ocar,oagent
+very_close_ahead:2:ocar,oagent

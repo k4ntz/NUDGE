@@ -1,0 +1,5 @@
+oplayer:obj1
+oenemy:obj2
+oball:obj3
+oballshadow:obj4
+image:img

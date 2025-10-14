@@ -1,0 +1,6 @@
+right:1:image
+left:1:image
+up:1:image
+down:1:image
+fire:1:image
+noop:1:image

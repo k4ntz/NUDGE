@@ -1,7 +1,3 @@
-nomove:1:image
+noop:1:image
 up:1:image
 down:1:image
-noop_because_left:1:image
-noop_because_right:1:image
-down_because_left:1:image
-down_because_right:1:image

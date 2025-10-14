@@ -1,0 +1,11 @@
+noop:1:image
+up_dodge_left:1:image
+up_dodge_right:1:image
+down_dodge_left:1:image
+down_dodge_right:1:image
+up_bonus_left:1:image
+up_bonus_right:1:image
+down_bonus_left:1:image
+down_bonus_right:1:image
+right_bonus:1:image
+left_bonus:1:image

@@ -1,0 +1,5 @@
+player_goleft:2:oplayer,oball
+player_goright:2:oplayer,oball
+player_godown:2:oplayer,oball
+player_goup:2:oplayer,oball
+ball_closeto_player:2:oplayer,oball

@@ -10,6 +10,7 @@ from typing import Callable
 import numpy as np
 import yaml
 from rtpt import RTPT
+import torch
 from torch.optim import Optimizer, Adam
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -33,11 +34,11 @@ def main(algorithm: str,
          env_kwargs: dict = None,
          rules: str = "default",
          seed: int = 0,
-         device: str = "cpu",
+         device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
          total_steps: int = 800000,
          max_ep_len: int = 500,
          update_steps: int = None,
-         epochs: int = 20,
+         epochs: int = 10,
          eps_clip: float = 0.2,
          gamma: float = 0.99,
          optimizer: Optimizer = Adam,
@@ -45,7 +46,7 @@ def main(algorithm: str,
          lr_critic: float = 0.0003,
          epsilon_fn: Callable = exp_decay,
          recover: bool = False,
-         save_steps: int = 250000,
+         save_steps: int = 800,
          stats_steps: int = 2000,
          ):
     """
