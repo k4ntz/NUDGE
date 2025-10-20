@@ -1,3 +1,9 @@
-type:2:object,type
-player_goleft:2:oplayer,oball
-player_goright:2:oplayer,oball
+flag_ahead:2:oflag,oplayer
+same_row_flags:2:oflag,oflag
+valid_gate_pair:3:oflag,oflag,oplayer
+center_left_of_player:3:oflag,oflag,oplayer
+center_right_of_player:3:oflag,oflag,oplayer
+centered_on_gate:3:oflag,oflag,oplayer
+flag_right_of_player:2:oflag,oplayer
+flag_left_of_player:2:oflag,oplayer
+horizontally_aligned:2:oflag,oplayer

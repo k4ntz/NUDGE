@@ -1,3 +1,6 @@
-left(X):-.
-noop(X):-.
-right(X):-.
+right(X):-valid_gate_pair(F1,F2,X),center_right_of_player(F1,F2,X).
+left(X):-valid_gate_pair(F1,F2,X),center_left_of_player(F1,F2,X).
+noop(X):-valid_gate_pair(F1,F2,X),centered_on_gate(F1,F2,X).
+right(X):-flag_ahead(F,X),flag_right_of_player(F,X).
+left(X):-flag_ahead(F,X),flag_left_of_player(F,X).
+noop(X):-flag_ahead(F,X),horizontally_aligned(F,X).
