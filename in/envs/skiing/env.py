@@ -12,7 +12,6 @@ class NudgeEnv(NudgeBaseEnv):
         'noop': 0,
         'right': 1,
         'left': 2,
-        'down': 3,
     }
     pred_names: Sequence
 
