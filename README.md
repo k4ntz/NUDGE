@@ -29,10 +29,12 @@ If you want to use NUDGE within other projects, you can install NUDGE locally as
 1. Inside ```nsfr/``` run
     ```bash
     python setup.py develop
+    pip install -e . (for windows cmd)
     ```
 2. Inside ```nudge/``` run
     ```bash
     python setup.py develop
+    pip install -e . (for windows cmd)
     ```
 
 ### Optional: Threefish and Loot Environments
